@@ -15,7 +15,7 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 - **Auditor** — When `task_counter.py` prints `TRIGGER_AUDITOR`
 
 **How to dispatch:**
-- Use `mcp_task` with `subagent_type`: `generalPurpose` (implementation), `code-reviewer` (review)
+- Use `mcp_task` with `subagent_type`: `developer` (implementation), `code-reviewer` (review), `planner`, `researcher`, `meta-planner`, `auditor`
 - Pass full task text and context — subagent must not re-read files
 - For Developer: include task ID, task file content, `.dreamteam/memory/architecture.md` snippet
 - For Reviewer: include changed files, task requirements, architecture rules

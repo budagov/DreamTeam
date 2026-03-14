@@ -11,12 +11,12 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
 
 | Subagent | When | mcp_task subagent_type |
 |----------|------|-------------------------|
-| **Planner** | New goal in chat, epic decomposition, task breakdown | generalPurpose |
-| **Developer** | Task from scheduler ready for implementation | generalPurpose |
+| **Planner** | New goal in chat, epic decomposition, task breakdown | planner |
+| **Developer** | Task from scheduler ready for implementation | developer |
 | **Reviewer** | After each task completion (spec compliance, then code quality) | code-reviewer |
-| **Researcher** | When `task_counter.py` prints `TRIGGER_RESEARCHER` | generalPurpose |
-| **Meta Planner** | When `task_counter.py` prints `TRIGGER_META_PLANNER` | generalPurpose |
-| **Auditor** | When `task_counter.py` prints `TRIGGER_AUDITOR` | generalPurpose |
+| **Researcher** | When `task_counter.py` prints `TRIGGER_RESEARCHER` | researcher |
+| **Meta Planner** | When `task_counter.py` prints `TRIGGER_META_PLANNER` | meta-planner |
+| **Auditor** | When `task_counter.py` prints `TRIGGER_AUDITOR` | auditor |
 
 ## Dispatch Flow
 

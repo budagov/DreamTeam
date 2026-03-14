@@ -22,12 +22,18 @@ def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
 
 
 def main() -> None:
-    """One round: verify -> get task -> print instructions."""
-    # 1. Verify consistency
+    """One round: verify -> [auto init-db + sync if needed] -> get task -> print instructions."""
+    # 1. Verify consistency; if mismatch, init-db (if needed) + sync
     r = run([sys.executable, os.path.join(SCRIPTS_DIR, "verify_tasks.py")], check=False)
     if r.returncode != 0:
-        print("FAIL: DB/file mismatch. Run: dreamteam sync-tasks", file=sys.stderr)
-        sys.exit(1)
+        db_path = project.get_db_path()
+        if not os.path.exists(db_path):
+            run([sys.executable, os.path.join(SCRIPTS_DIR, "init_db.py")], check=False)
+        print("Syncing tasks to DB...", file=sys.stderr)
+        r2 = run([sys.executable, os.path.join(SCRIPTS_DIR, "sync_tasks.py")], check=False)
+        if r2.returncode != 0:
+            print("FAIL: dreamteam sync-tasks failed. Run: dreamteam init-db", file=sys.stderr)
+            sys.exit(1)
 
     # 2. Get next task
     r = run([sys.executable, os.path.join(SCRIPTS_DIR, "scheduler.py")])

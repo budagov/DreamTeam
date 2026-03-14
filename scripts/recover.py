@@ -14,9 +14,10 @@ STUCK_MINUTES = 60  # in_progress older than this -> reset to todo
 def sync_tasks() -> bool:
     """Run sync_tasks.py."""
     import subprocess
+    root = project.get_project_root()
     r = subprocess.run(
         [sys.executable, os.path.join(os.path.dirname(__file__), "sync_tasks.py")],
-        cwd=os.path.dirname(os.path.dirname(__file__)),
+        cwd=root,
         capture_output=True,
         text=True,
     )
@@ -98,9 +99,10 @@ def main() -> None:
     # 3. Verify
     print("3. Verifying...")
     import subprocess
+    root = project.get_project_root()
     r = subprocess.run(
         [sys.executable, os.path.join(os.path.dirname(__file__), "verify_tasks.py")],
-        cwd=os.path.dirname(os.path.dirname(__file__)),
+        cwd=root,
         capture_output=True,
         text=True,
     )
@@ -112,7 +114,7 @@ def main() -> None:
     print("4. Checking memory...")
     r = subprocess.run(
         [sys.executable, os.path.join(os.path.dirname(__file__), "check_memory.py")],
-        cwd=os.path.dirname(os.path.dirname(__file__)),
+        cwd=root,
         capture_output=True,
         text=True,
     )

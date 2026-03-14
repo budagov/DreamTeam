@@ -34,11 +34,8 @@ env/
 # Project-specific (DreamTeam repo = engine only, no project data)
 .dreamteam/
 
-# Test projects (optional - remove if you want to track)
-# empty-test/
-# empty-test2/
-# empty-bootstrap/
-# test-project/
+# Integration test (system E2E)
+integration-test/
 
 # OS
 .DS_Store
