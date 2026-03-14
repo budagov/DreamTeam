@@ -65,6 +65,10 @@ pip install -e ".[dev]"
 pytest tests
 ```
 
+## License
+
+PolyForm Noncommercial 1.0.0 (Government Use Prohibited) — personal, educational, non-profit only. No commercial use. No government use. See [LICENSE](../LICENSE)
+
 ## Requirements
 
 - Python 3.10+
