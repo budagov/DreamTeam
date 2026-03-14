@@ -66,9 +66,9 @@ When starting a new session or resuming after a break:
 ## Minimal Context (1000-task resilience)
 
 - **One task per turn** — Each cycle = one mcp_task dispatch + one Terminal. No file reads.
-- **Checkpoint every 50–60 tasks** — 21 tasks ≈ 36% context. Reply: "Checkpoint. New session: verify-tasks, then 'Continue'."
+- **No manual checkpoints** — Left/Right return after 33 tasks, context discarded. Main dispatches next Sub (fresh context).
 - **State in .dreamteam/ only** — Never summarize history. Terminal output + task ID is enough.
-- **Your reply ≤ 50 words** — Do not echo subagent output. Do not summarize. Just: "Dispatching Developer: T022" or "Checkpoint."
+- **Your reply ≤ 50 words** — Do not echo subagent output. Do not summarize. Just: "Dispatching Developer: T022"
 
 ## Error Recovery (do not stop — act immediately)
 

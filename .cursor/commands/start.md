@@ -14,7 +14,7 @@ You are the **Orchestrator**. User invoked `/start` with a goal.
 
 2. **Planning (choose one):**
    - **<500 tasks:** Launch Planner — "Create 200–250 tasks for: [goal]. Small tasks: 1–3 files, ~15–30 min. Write to .dreamteam/tasks/. T001 dependencies: []." After return: sync-tasks. If more needed, Planner again.
-   - **500+ tasks:** Load orchestrator-main.md. **Dispatch Left** with goal. Left: Planner (epic outline) → Sub-Planner per epic until 50 → sync-tasks → BATCH_DONE. Main hands off to Right. Right: Sub-Planner next epics until 50. Alternate until all planned. Then execution (Left 50, Right 50).
+   - **500+ tasks:** Load orchestrator-main.md. **Dispatch Left** with goal. Left: Planner (epic outline) → Sub-Planner per epic until 33 → sync-tasks → BATCH_DONE. Main hands off to Right. Right: Sub-Planner next epics until 33. Alternate until all planned. Then execution (Left 33, Right 33).
 3. **After planning done** — Terminal: `sync-tasks` (if not done by Left/Right).
 4. **Then** — Terminal: `run-next`, read task ID. (First task is always T001.)
 

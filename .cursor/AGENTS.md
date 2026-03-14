@@ -36,8 +36,8 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 
 | Role | Prompt File | When to Use |
 |------|-------------|-------------|
-| Main Orchestrator | `.cursor/agents/orchestrator-main.md` | Dispatches Sub-Orchestrators (50 tasks each), minimal context |
-| Sub-orchestrator (Left/Right) | `.cursor/agents/orchestrator-sub.md` | Re-checks DB on start, runs 50-task batch |
+| Main Orchestrator | `.cursor/agents/orchestrator-main.md` | Dispatches Sub-Orchestrators (33 tasks each), minimal context |
+| Sub-orchestrator (Left/Right) | `.cursor/agents/orchestrator-sub.md` | Re-checks DB on start, runs 33-task batch |
 | Orchestrator | `.cursor/agents/orchestrator.md` | Single-session flow (or when Sub loads it) |
 | Planner | `.cursor/agents/planner.md` | New goal, epic, or task decomposition |
 | Planner-Sub | `.cursor/agents/planner-sub.md` | Expand one epic into 15–25 subtasks |

@@ -56,7 +56,7 @@ your-project/
 
 ## 500+ Tasks: Main Orchestrator + Left/Right
 
-For large projects, use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 50. Planning: Sub-Planner per epic until 50 tasks. Execution: Developer → Reviewer → Git-Ops loop. Alternate Left ↔ Right until ALL_COMPLETE.
+For large projects, use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 33. Planning: Sub-Planner per epic until 33 tasks. Execution: Developer → Reviewer → Git-Ops loop. Alternate Left ↔ Right until ALL_COMPLETE.
 
 ## Development
 
