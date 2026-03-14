@@ -62,7 +62,9 @@ def create_project(path: str) -> str:
 
     # Copy .cursor (agents, skills, rules)
     cursor_dest = os.path.join(root, ".cursor")
-    if os.path.isdir(CURSOR_SOURCE):
+    if os.path.normpath(CURSOR_SOURCE) == os.path.normpath(cursor_dest):
+        pass  # Same path (new-project . from DreamTeam root) — keep existing .cursor
+    elif os.path.isdir(CURSOR_SOURCE):
         if os.path.exists(cursor_dest):
             shutil.rmtree(cursor_dest)
         shutil.copytree(CURSOR_SOURCE, cursor_dest)
