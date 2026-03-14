@@ -16,27 +16,20 @@ Goal → Planner → Task DAG → Scheduler → Composer Agents → Testing → 
 ## Quick Start
 
 ```bash
-# 1. Clone and setup (one time)
+# 1. Clone
 git clone https://github.com/budagov/DreamTeam.git
 cd DreamTeam
+
+# 2. Setup (installs + creates project)
 ./setup.sh          # Linux/Mac
 # or: .\setup.ps1   # Windows PowerShell
 
-# 2. New project (from your folder)
-cd path/to/your/project
-dreamteam new-project .
-dreamteam run-next
+# 3. Open in Cursor → /start + your goal → dreamteam run-next
 ```
+
+Setup creates db/, memory/, tasks/, .cursor/. Open folder in Cursor, run **`/start`** + goal, then `dreamteam run-next`.
 
 **Or:** `python -m dreamteam` if `dreamteam` not in PATH. See [INSTALL.md](INSTALL.md).
-
-## First Goal
-
-In Cursor chat: **`/start`** + your goal. Example:
-```
-/start Build a REST API for a todo app with auth
-```
-Planner creates an epic and 50–500 tasks. Then: `dreamteam run-next`.
 
 ## Documentation
 

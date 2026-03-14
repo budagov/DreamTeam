@@ -1,4 +1,4 @@
-# DreamTeam — quick setup after clone
+# DreamTeam — one-command setup after clone
 # Run from DreamTeam folder: .\setup.ps1
 
 $ErrorActionPreference = "Stop"
@@ -12,5 +12,12 @@ Write-Host "Verifying..." -ForegroundColor Cyan
 python -m dreamteam 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-Write-Host "OK. Use: python -m dreamteam new-project ." -ForegroundColor Green
-Write-Host "  or: dreamteam new-project <path>" -ForegroundColor Green
+if (-not (Test-Path ".dreamteam")) {
+    Write-Host ""
+    Write-Host "Creating project..." -ForegroundColor Cyan
+    python -m dreamteam new-project .
+    if ($LASTEXITCODE -ne 0) { exit 1 }
+}
+
+Write-Host ""
+Write-Host "Ready. Open in Cursor, run /start + your goal, then dreamteam run-next" -ForegroundColor Green

@@ -1,5 +1,5 @@
 #!/bin/bash
-# DreamTeam — quick setup after clone
+# DreamTeam — one-command setup after clone
 # Run from DreamTeam folder: ./setup.sh
 
 set -e
@@ -9,5 +9,9 @@ echo ""
 echo "Verifying..."
 python -m dreamteam
 echo ""
-echo "OK. Use: python -m dreamteam new-project ."
-echo "  or: dreamteam new-project <path>"
+if [ ! -f .dreamteam ]; then
+    echo "Creating project..."
+    python -m dreamteam new-project .
+fi
+echo ""
+echo "Ready. Open in Cursor, run /start + your goal, then dreamteam run-next"
