@@ -27,7 +27,7 @@ def main() -> None:
     print("\n## Output")
     print("- Audit report (markdown)")
     print("- Refactor tasks for critical issues")
-    print("- Update memory/architecture.md with findings")
+    print("- Update .dreamteam/memory/architecture.md with findings")
 
 
 if __name__ == "__main__":

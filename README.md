@@ -27,7 +27,7 @@ pip install -e .          # or: .\setup.ps1  /  ./setup.sh
 cd C:\Projects\my-app     # empty folder
 dreamteam new-project .
 
-# 3. Open my-app in Cursor → /start + goal → dreamteam run-next
+# 3. Open my-app in Cursor → /start + goal → /run (or dreamteam run-next)
 ```
 
 Result: `my-app/` has only `.dreamteam/`, `.cursor/`, and your `src/` — no engine code in the project.
@@ -37,7 +37,7 @@ Result: `my-app/` has only `.dreamteam/`, `.cursor/`, and your `src/` — no eng
 ## Documentation
 
 - [INSTALL.md](INSTALL.md) — Install from clone, troubleshooting
-- [Quick Start Agent](docs/QUICK_START_AGENT.md) — `/start` and task workflow
+- [Quick Start Agent](docs/QUICK_START_AGENT.md) — `/start`, `/run`, task workflow
 - [Empty Project Setup](docs/EMPTY_PROJECT_SETUP.md) — Bootstrap from empty folder in Cursor
 - [Running 1000 Tasks](docs/RUNNING_1000_TASKS.md) — Resilience guide for long runs
 - [Instructions](docs/INSTRUCTIONS.md) — System overview and usage

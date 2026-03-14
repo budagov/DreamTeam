@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+"""Shared database connection. All scripts use project.get_db_path()."""
+
+import contextlib
+import sqlite3
+
+import project
+
+DB_PATH = project.get_db_path()
+
+
+@contextlib.contextmanager
+def conn():
+    """Context manager: yields (conn, cursor), auto-closes."""
+    c = sqlite3.connect(DB_PATH)
+    cur = c.cursor()
+    try:
+        yield c, cur
+    finally:
+        c.close()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify consistency between task files (tasks/*.md) and database."""
+"""Verify consistency between task files (.dreamteam/tasks/*.md) and database."""
 
 import os
 import sys

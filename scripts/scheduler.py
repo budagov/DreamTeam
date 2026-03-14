@@ -6,8 +6,7 @@ import os
 import sys
 import json
 
-import project
-DB_PATH = project.get_db_path()
+import db
 
 
 def get_done_ids(cursor: sqlite3.Cursor) -> set[str]:
@@ -29,24 +28,21 @@ def parse_dependencies(deps_str: str | None) -> list[str]:
 
 def get_next_task() -> str | None:
     """Return next task ID ready for execution, or None."""
-    if not os.path.exists(DB_PATH):
+    if not os.path.exists(db.DB_PATH):
         print("Database not found. Run: dreamteam init-db", file=sys.stderr)
         return None
 
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    done_ids = get_done_ids(cursor)
-
-    cursor.execute(
-        """
-        SELECT id, title, status, priority, dependencies
-        FROM tasks
-        WHERE status = 'todo'
-        ORDER BY priority DESC, id ASC
-        """
-    )
-    rows = cursor.fetchall()
-    conn.close()
+    with db.conn() as (conn, cursor):
+        done_ids = get_done_ids(cursor)
+        cursor.execute(
+            """
+            SELECT id, title, status, priority, dependencies
+            FROM tasks
+            WHERE status = 'todo'
+            ORDER BY priority DESC, id ASC
+            """
+        )
+        rows = cursor.fetchall()
 
     for task_id, title, status, priority, deps_str in rows:
         deps = parse_dependencies(deps_str)
@@ -58,17 +54,15 @@ def get_next_task() -> str | None:
 
 def list_tasks() -> None:
     """List all tasks with status."""
-    if not os.path.exists(DB_PATH):
+    if not os.path.exists(db.DB_PATH):
         print("Database not found. Run: dreamteam init-db", file=sys.stderr)
         return
 
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, title, status, priority, dependencies FROM tasks ORDER BY id"
-    )
-    rows = cursor.fetchall()
-    conn.close()
+    with db.conn() as (conn, cursor):
+        cursor.execute(
+            "SELECT id, title, status, priority, dependencies FROM tasks ORDER BY id"
+        )
+        rows = cursor.fetchall()
 
     for task_id, title, status, priority, deps in rows:
         print(f"{task_id} | {status} | P{priority} | {title} | deps: {deps or '[]'}")
@@ -76,24 +70,21 @@ def list_tasks() -> None:
 
 def list_ready() -> None:
     """List tasks ready for execution."""
-    if not os.path.exists(DB_PATH):
+    if not os.path.exists(db.DB_PATH):
         print("Database not found. Run: dreamteam init-db", file=sys.stderr)
         return
 
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    done_ids = get_done_ids(cursor)
-
-    cursor.execute(
-        """
-        SELECT id, title, status, priority, dependencies
-        FROM tasks
-        WHERE status = 'todo'
-        ORDER BY priority DESC, id ASC
-        """
-    )
-    rows = cursor.fetchall()
-    conn.close()
+    with db.conn() as (conn, cursor):
+        done_ids = get_done_ids(cursor)
+        cursor.execute(
+            """
+            SELECT id, title, status, priority, dependencies
+            FROM tasks
+            WHERE status = 'todo'
+            ORDER BY priority DESC, id ASC
+            """
+        )
+        rows = cursor.fetchall()
 
     for task_id, title, status, priority, deps_str in rows:
         deps = parse_dependencies(deps_str)

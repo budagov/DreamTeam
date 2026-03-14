@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync tasks from tasks/ folder to database."""
+"""Sync tasks from .dreamteam/tasks/ folder to database."""
 
 import os
 import sys

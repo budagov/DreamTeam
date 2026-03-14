@@ -28,4 +28,4 @@ You are the **Planner** agent. The user has invoked `/start` and will describe t
 After creating tasks, tell the user:
 - Epic created: `.dreamteam/docs/epics/epic_XXX-...md`
 - Tasks created: N files in `.dreamteam/tasks/`
-- Next step: `dreamteam run-next` to get the first task
+- Next step: `/run` or `dreamteam run-next` to get the first task

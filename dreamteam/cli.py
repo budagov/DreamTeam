@@ -124,7 +124,7 @@ def main() -> None:
         print()
         print("Or set env: DREAMTEAM_PROJECT=" + root)
         print()
-        print("Each project has its own: db/, memory/, tasks/, .cursor/ — brains are isolated.")
+        print("Each project has its own: .dreamteam/ (db, memory, tasks), .cursor/ — brains are isolated.")
         return
 
     if cmd in SCRIPT_MAP:

@@ -60,7 +60,7 @@ When starting a new session or resuming after a break:
 
 - **One task per turn:** Each message = one task. Do not accumulate full history.
 - **Session checkpoint (every 20–50 tasks):** Reply: "Checkpoint. Start new session, run: verify_tasks.py, then say 'Continue'."
-- **State in db/memory only:** Do not rely on chat history. Read from scheduler, memory, tasks.
+- **State in .dreamteam/ only:** Do not rely on chat history. Read from scheduler, memory, tasks.
 - **Use run-next:** For simplest loop: user runs `dreamteam run-next`, gets task, executes, runs the 3 commands printed.
 
 ## Error Recovery

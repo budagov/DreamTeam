@@ -26,7 +26,8 @@ def test_parse_dependencies_comma():
 def test_get_next_task_empty_db(monkeypatch, tmp_path):
     db_path = tmp_path / "db" / "dag.db"
     db_path.parent.mkdir(parents=True)
-    monkeypatch.setattr(scheduler, "DB_PATH", str(db_path))
+    import db as db_mod
+    monkeypatch.setattr(db_mod, "DB_PATH", str(db_path))
 
     conn = sqlite3.connect(db_path)
     conn.executescript("""
@@ -43,7 +44,8 @@ def test_get_next_task_empty_db(monkeypatch, tmp_path):
 def test_get_next_task_returns_ready(monkeypatch, tmp_path):
     db_path = tmp_path / "db" / "dag.db"
     db_path.parent.mkdir(parents=True)
-    monkeypatch.setattr(scheduler, "DB_PATH", str(db_path))
+    import db as db_mod
+    monkeypatch.setattr(db_mod, "DB_PATH", str(db_path))
 
     conn = sqlite3.connect(db_path)
     conn.executescript("""
@@ -62,7 +64,8 @@ def test_get_next_task_returns_ready(monkeypatch, tmp_path):
 def test_get_next_task_waits_for_deps(monkeypatch, tmp_path):
     db_path = tmp_path / "db" / "dag.db"
     db_path.parent.mkdir(parents=True)
-    monkeypatch.setattr(scheduler, "DB_PATH", str(db_path))
+    import db as db_mod
+    monkeypatch.setattr(db_mod, "DB_PATH", str(db_path))
 
     conn = sqlite3.connect(db_path)
     conn.executescript("""
