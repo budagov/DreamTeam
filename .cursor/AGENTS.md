@@ -62,4 +62,4 @@ Project skills in `.cursor/skills/`:
 
 ## Commands
 
-Use `dreamteam` CLI. See `dreamteam` (no args) or COMMANDS.md.
+Use `python -m dreamteam`. See COMMANDS.md.

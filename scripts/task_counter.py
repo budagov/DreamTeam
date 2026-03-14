@@ -23,7 +23,7 @@ def get_count(cursor: sqlite3.Cursor) -> int:
 def increment() -> int:
     """Increment tasks_completed and return new value. Emit triggers to stdout."""
     if not os.path.exists(DB_PATH):
-        print("Database not found. Run: dreamteam init-db", file=sys.stderr)
+        print("Database not found. Run: python -m dreamteam init-db", file=sys.stderr)
         return 0
 
     conn = sqlite3.connect(DB_PATH)
@@ -50,7 +50,7 @@ def increment() -> int:
 def status() -> int:
     """Print current count without incrementing."""
     if not os.path.exists(DB_PATH):
-        print("Database not found. Run: dreamteam init-db", file=sys.stderr)
+        print("Database not found. Run: python -m dreamteam init-db", file=sys.stderr)
         return 0
 
     conn = sqlite3.connect(DB_PATH)

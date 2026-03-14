@@ -6,21 +6,21 @@ When this file is present, the project uses DreamTeam Autonomous Development Sys
 
 If .dreamteam/ does NOT exist, run:
 ```
-dreamteam new-project .
+python -m dreamteam new-project .
 ```
 
-## All commands use dreamteam CLI
+## All commands
 
-Use `dreamteam <command>` instead of python scripts. Commands:
-- dreamteam new-project <path>  — Create project
-- dreamteam run-next            — Get next task
-- dreamteam sync-tasks          — Sync tasks to DB
-- dreamteam verify-tasks        — Verify DB/file consistency
-- dreamteam update-task <id> <status>
-- dreamteam task-counter
-- dreamteam recover             — Recovery from failures
-- dreamteam check-memory
-- dreamteam current-project
+Use `python -m dreamteam <command>` (works without PATH). Commands:
+- python -m dreamteam new-project <path>  — Create project
+- python -m dreamteam run-next   — Get next task
+- python -m dreamteam sync-tasks          — Sync tasks to DB
+- python -m dreamteam verify-tasks        — Verify consistency
+- python -m dreamteam update-task <id> <status>
+- python -m dreamteam task-counter
+- python -m dreamteam recover             — Recovery from failures
+- python -m dreamteam check-memory
+- python -m dreamteam current-project
 
 ## After deployment
 

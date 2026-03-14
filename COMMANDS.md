@@ -1,6 +1,6 @@
 # DreamTeam — Commands
 
-Use `dreamteam` CLI (or `python -m dreamteam`). Run `dreamteam` with no args for help.
+Use `python -m dreamteam <command>` (works without PATH). Or `dreamteam` if in PATH.
 
 ## Projects
 

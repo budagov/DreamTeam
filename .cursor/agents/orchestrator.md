@@ -20,8 +20,8 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
 
 ## Dispatch Flow
 
-1. **Get task:** `dreamteam scheduler` → task ID
-2. **Set in progress:** `dreamteam update-task <id> in_progress`
+1. **Get task:** `python -m dreamteam scheduler` → task ID
+2. **Set in progress:** `python -m dreamteam update-task <id> in_progress`
 3. **Dispatch Developer subagent** with:
    - Full task file content
    - Relevant `.dreamteam/memory/architecture.md` excerpt
@@ -32,9 +32,9 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
    - Task requirements
    - Architecture rules
    - Reference: `.cursor/agents/reviewer.md`
-5. **On approval** — `dreamteam update-task <id> done`; `dreamteam task-counter`
-6. **If trigger** — Dispatch Researcher / Meta Planner / Auditor per output (reference corresponding `.cursor/agents/*.md`)
-7. **After TRIGGER_RESEARCHER** — Run `dreamteam vector-index`, then `dreamteam check-memory`
+5. **On approval** — `python -m dreamteam update-task <id> done`; `python -m dreamteam task-counter`
+6. **If trigger** — Dispatch Researcher / Meta Planner / Auditor per task_counter output (reference `.cursor/agents/*.md`)
+7. **After TRIGGER_RESEARCHER** — Run `python -m dreamteam vector-index`, then `python -m dreamteam check-memory`
 
 ## Subagent Prompt References
 
@@ -49,9 +49,9 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
 
 When starting a new session or resuming after a break:
 
-1. **Verify consistency:** `dreamteam verify-tasks` (exit 1 = dreamteam sync-tasks)
-2. **Check state:** `dreamteam task-counter --status` → current tasks_completed count
-3. **Get next task:** `dreamteam scheduler` → task ID (or NONE if done)
+1. **Verify consistency:** `python -m dreamteam verify-tasks` (exit 1 = python -m dreamteam sync-tasks)
+2. **Check state:** `python -m dreamteam task-counter --status` → current tasks_completed count
+3. **Get next task:** `python -m dreamteam scheduler` → task ID (or NONE if done)
 4. **If NONE** — All tasks complete. Run final review if needed.
 5. **If task ID** — Continue from step 2 of Dispatch Flow (set in progress, dispatch Developer)
 6. **Do not rely on session history** — All context comes from `.dreamteam/memory/`, `.dreamteam/tasks/`, `.dreamteam/db/`
@@ -59,15 +59,15 @@ When starting a new session or resuming after a break:
 ## Minimal Context (1000-task resilience)
 
 - **One task per turn:** Each message = one task. Do not accumulate full history.
-- **Session checkpoint (every 20–50 tasks):** Reply: "Checkpoint. Start new session, run: verify_tasks.py, then say 'Continue'."
+- **Session checkpoint (every 20–50 tasks):** Reply: "Checkpoint. Start new session, run: python -m dreamteam verify-tasks, then say 'Continue'."
 - **State in .dreamteam/ only:** Do not rely on chat history. Read from scheduler, memory, tasks.
-- **Use run-next:** For simplest loop: user runs `dreamteam run-next`, gets task, executes, runs the 3 commands printed.
+- **Use run-next:** For simplest loop: user runs `python -m dreamteam run-next`, gets task, executes, runs the 3 commands printed.
 
 ## Error Recovery
 
-- **Task failed / subagent crashed:** Run `dreamteam recover` — resets stuck in_progress, syncs, verifies.
-- **DB/file mismatch:** `dreamteam sync-tasks`
-- **Memory overflow:** Researcher + `check_memory.py`
+- **Task failed / subagent crashed:** Run `python -m dreamteam recover` — resets stuck in_progress, syncs, verifies.
+- **DB/file mismatch:** `python -m dreamteam sync-tasks`
+- **Memory overflow:** Researcher + `python -m dreamteam check-memory`
 
 ## Rules
 

@@ -19,7 +19,7 @@ You are the **Developer** agent for the Autonomous Development System. Your role
 - Task ID (e.g. T001)
 - Task file from `.dreamteam/tasks/task_XXX.md`
 - Context: `.dreamteam/memory/architecture.md`, relevant source files
-- **Large codebase (100+ tasks):** Run `dreamteam vector-search "<query>"` to find relevant files before implementing
+- **Large codebase (100+ tasks):** Run `python -m dreamteam vector-search "<query>"` to find relevant files before implementing
 
 ## Output
 
@@ -35,7 +35,7 @@ You are the **Developer** agent for the Autonomous Development System. Your role
 3. **Implement** — Write code per task requirements
 4. **Test** — Run tests, fix any failures
 5. **Complete** — Set status to `done` in file and database
-6. **Run task counter** — Execute `dreamteam task-counter`
+6. **Run task counter** — Execute `python -m dreamteam task-counter`
 
 ## Rules
 

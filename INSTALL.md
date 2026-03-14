@@ -12,7 +12,7 @@ cd DreamTeam
 
 # 2. Create project in a SEPARATE folder
 cd C:\Projects\my-app
-dreamteam new-project .
+python -m dreamteam new-project .
 
 # 3. Open my-app in Cursor, run /start + goal, dreamteam run-next
 ```

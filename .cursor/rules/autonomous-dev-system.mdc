@@ -10,7 +10,7 @@ alwaysApply: true
 When user invokes `/start` or `/run`:
 - **NEVER** write code, create tasks, or implement in this chat.
 - **ALWAYS** delegate to subagents (Task tool, `/planner`, `/developer`).
-- **YOU** run `dreamteam` commands (sync-tasks, run-next, update-task, task-counter).
+- **YOU** run `python -m dreamteam` commands (sync-tasks, run-next, update-task, task-counter).
 - Pass full context to subagents — they must not re-read files.
 
 ## Task Execution
@@ -55,9 +55,9 @@ Valid statuses: `todo`, `in_progress`, `done`, `blocked`.
 
 ## Commands
 
-Use `dreamteam` CLI, not python scripts:
-- dreamteam run-next, dreamteam update-task, dreamteam task-counter
-- dreamteam verify-tasks, dreamteam sync-tasks, dreamteam recover
+Use `python -m dreamteam` (works without PATH):
+- python -m dreamteam run-next, update-task, task-counter
+- python -m dreamteam verify-tasks, sync-tasks, recover
 
 ## Console & UI
 

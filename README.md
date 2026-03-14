@@ -25,7 +25,7 @@ cd DreamTeam
 
 # 2. Create project in a CLEAN folder (not inside DreamTeam!)
 cd C:\Projects\my-app     # empty folder
-dreamteam new-project .
+python -m dreamteam new-project .
 
 # 3. Open my-app in Cursor → /start + goal → /run
 ```

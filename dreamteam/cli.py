@@ -29,11 +29,11 @@ CURSORRULES_TEMPLATE = """# DreamTeam — Autonomous Development System
 
 ## Deploy (if .dreamteam/ does not exist)
 
-Run: `dreamteam new-project .`
+Run: `python -m dreamteam new-project .`
 
-## All commands use dreamteam CLI
+## All commands
 
-Use `dreamteam <command>` — never python scripts.
+Use `python -m dreamteam <command>` (or `dreamteam` if in PATH).
 
 | Command | Action |
 |---------|--------|
@@ -120,7 +120,7 @@ def main() -> None:
         print()
         print("To use this project:")
         print(f"  cd {root}")
-        print("  dreamteam run-next")
+        print("  python -m dreamteam run-next")
         print()
         print("Or set env: DREAMTEAM_PROJECT=" + root)
         print()
