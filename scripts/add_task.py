@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""Add or update a task in the database from a markdown file."""
+
+import sqlite3
+import os
+import sys
+import re
+import json
+from datetime import datetime, timezone
+
+import project
+DB_PATH = project.get_db_path()
+TASKS_DIR = project.get_tasks_dir()
+
+
+def parse_task_file(content: str) -> dict | None:
+    """Parse task markdown frontmatter into dict."""
+    # Match id:, title:, status:, priority:, dependencies:, owner:
+    patterns = {
+        "id": r"id:\s*(.+)",
+        "title": r"title:\s*(.+)",
+        "status": r"status:\s*(.+)",
+        "priority": r"priority:\s*(\d+)",
+        "dependencies": r"dependencies:\s*(.+)",
+        "owner": r"owner:\s*(.+)",
+    }
+    result = {}
+    for key, pattern in patterns.items():
+        m = re.search(pattern, content, re.IGNORECASE)
+        if m:
+            val = m.group(1).strip()
+            if key == "dependencies":
+                val = val.strip("[]")
+                if val:
+                    try:
+                        result[key] = json.dumps([x.strip() for x in val.split(",")])
+                    except Exception:
+                        result[key] = "[]"
+                else:
+                    result[key] = "[]"
+            elif key == "priority":
+                result[key] = int(val) if val.isdigit() else 1
+            else:
+                result[key] = val
+    if "id" not in result:
+        return None
+    result.setdefault("title", "")
+    result.setdefault("status", "todo")
+    result.setdefault("priority", 1)
+    result.setdefault("dependencies", "[]")
+    result.setdefault("owner", "")
+    return result
+
+
+def add_task(task_data: dict, upsert: bool = True) -> bool:
+    """Insert or update task in database."""
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    if upsert:
+        cursor.execute(
+            """
+            INSERT INTO tasks (id, title, status, priority, dependencies, owner, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                title = excluded.title,
+                status = excluded.status,
+                priority = excluded.priority,
+                dependencies = excluded.dependencies,
+                owner = excluded.owner,
+                updated_at = excluded.updated_at
+            """,
+            (
+                task_data["id"],
+                task_data["title"],
+                task_data["status"],
+                task_data["priority"],
+                task_data["dependencies"],
+                task_data.get("owner", ""),
+                now,
+                now,
+            ),
+        )
+    else:
+        cursor.execute(
+            """
+            INSERT OR IGNORE INTO tasks (id, title, status, priority, dependencies, owner, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                task_data["id"],
+                task_data["title"],
+                task_data["status"],
+                task_data["priority"],
+                task_data["dependencies"],
+                task_data.get("owner", ""),
+                now,
+                now,
+            ),
+        )
+    conn.commit()
+    conn.close()
+    return True
+
+
+def main() -> None:
+    """Add task from file or stdin."""
+    if len(sys.argv) < 2:
+        print("Usage: python add_task.py <task_id|file_path>", file=sys.stderr)
+        sys.exit(1)
+
+    arg = sys.argv[1]
+    content = None
+
+    if os.path.exists(arg):
+        with open(arg, encoding="utf-8") as f:
+            content = f.read()
+    else:
+        path = os.path.join(TASKS_DIR, f"{arg}.md")
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                content = f.read()
+
+    if not content:
+        print(f"Task file not found: {arg}", file=sys.stderr)
+        sys.exit(1)
+
+    task_data = parse_task_file(content)
+    if not task_data:
+        print("Could not parse task (missing id)", file=sys.stderr)
+        sys.exit(1)
+
+    add_task(task_data)
+    print(f"Task {task_data['id']} added/updated.")
+
+
+if __name__ == "__main__":
+    main()

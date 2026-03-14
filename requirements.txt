@@ -1,0 +1,4 @@
+# Core: stdlib only (no install needed)
+# Optional for 100+ tasks (vector memory / semantic search):
+sentence-transformers>=2.2.0
+numpy>=1.24.0

@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual env
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project-specific (DreamTeam repo = engine only, no project data)
+db/
+memory/
+tasks/
+.dreamteam
+
+# Test projects (optional - remove if you want to track)
+# empty-test/
+# empty-test2/
+# empty-bootstrap/
+# test-project/
+
+# OS
+.DS_Store
+Thumbs.db

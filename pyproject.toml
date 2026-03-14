@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dreamteam"
+version = "0.1.0"
+description = "Autonomous Development System — 500-1000 tasks without quality degradation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+vector = ["sentence-transformers>=2.2.0", "numpy>=1.24.0"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+dreamteam = "dreamteam.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dreamteam*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]

@@ -1,0 +1,27 @@
+# DreamTeam — Bootstrap Rules (for empty project)
+
+When this file is present, the project uses DreamTeam Autonomous Development System.
+
+## First step: Deploy environment
+
+If db/, memory/, tasks/, .cursor/ do NOT exist, run:
+```
+dreamteam new-project .
+```
+
+## All commands use dreamteam CLI
+
+Use `dreamteam <command>` instead of python scripts. Commands:
+- dreamteam new-project <path>  — Create project
+- dreamteam run-next            — Get next task
+- dreamteam sync-tasks          — Sync tasks to DB
+- dreamteam verify-tasks        — Verify DB/file consistency
+- dreamteam update-task <id> <status>
+- dreamteam task-counter
+- dreamteam recover             — Recovery from failures
+- dreamteam check-memory
+- dreamteam current-project
+
+## After deployment
+
+Load rules from .cursor/rules/ and agents from .cursor/agents/

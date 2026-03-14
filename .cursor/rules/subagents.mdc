@@ -1,0 +1,10 @@
+---
+description: When dispatching subagents, use .cursor/agents/orchestrator.md
+globs: ["tasks/**", ".cursor/agents/**"]
+---
+
+# Subagent Dispatch
+
+When dispatching Developer, Reviewer, Planner, or trigger-based agents:
+
+**Load prompt from `.cursor/agents/orchestrator.md`** — full dispatch flow and rules.
