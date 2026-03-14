@@ -22,6 +22,7 @@ SCRIPT_MAP = {
     "current-project": "current_project.py",
     "vector-index": "vector_index.py",
     "vector-search": "vector_search.py",
+    "git-commit": "git_commit.py",
 }
 
 
@@ -46,6 +47,7 @@ Use `python -m dreamteam <command>` (or `dreamteam` if in PATH).
 | dreamteam recover | Recovery |
 | dreamteam check-memory | Validate memory |
 | dreamteam current-project | Show project root |
+| dreamteam git-commit <id> <msg> | Add, commit, push for task |
 
 ## After deploy
 
@@ -100,6 +102,7 @@ def main() -> None:
         print("  current-project      Show current project root")
         print("  vector-index         Index codebase for semantic search")
         print("  vector-search <q>    Semantic search over indexed code")
+        print("  git-commit <id> <msg>  Add, commit, push for task")
         print("  bootstrap            Create .cursorrules in cwd (for empty project)")
         print()
         sys.exit(0)

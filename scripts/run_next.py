@@ -21,8 +21,29 @@ def run(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     )
 
 
+def _git_pull() -> None:
+    """Pull latest changes before starting a task. Skip if not a git repo or pull fails."""
+    r = run(["git", "pull"], check=False)
+    if r.returncode == 0:
+        if r.stdout and r.stdout.strip():
+            print("Git pull:", r.stdout.strip())
+    else:
+        err = (r.stderr or r.stdout or "").lower()
+        skip = (
+            "not a git repository" in err
+            or "not found" in err
+            or "no tracking information" in err
+            or "please specify which branch" in err
+        )
+        if not skip:
+            print("Git pull failed (continuing):", (r.stderr or r.stdout or "").strip(), file=sys.stderr)
+
+
 def main() -> None:
-    """One round: verify -> [auto init-db + sync if needed] -> get task -> print instructions."""
+    """One round: git pull -> verify -> [auto init-db + sync if needed] -> get task -> print instructions."""
+    # 0. Update from remote before each task
+    _git_pull()
+
     # 1. Verify consistency; if mismatch, init-db (if needed) + sync
     r = run([sys.executable, os.path.join(SCRIPTS_DIR, "verify_tasks.py")], check=False)
     if r.returncode != 0:
@@ -32,7 +53,7 @@ def main() -> None:
         print("Syncing tasks to DB...", file=sys.stderr)
         r2 = run([sys.executable, os.path.join(SCRIPTS_DIR, "sync_tasks.py")], check=False)
         if r2.returncode != 0:
-            print("FAIL: dreamteam sync-tasks failed. Run: dreamteam init-db", file=sys.stderr)
+            print("FAIL: sync-tasks failed. Run: python -m dreamteam init-db", file=sys.stderr)
             sys.exit(1)
 
     # 2. Get next task
@@ -52,16 +73,18 @@ def main() -> None:
     print("=" * 60)
     print()
     print("1. Execute this task (use Composer with .cursor/agents/developer.md)")
-    print(f"2. When done, run:")
+    print("2. After Reviewer approval: git commit & push:")
+    print(f"   python -m dreamteam git-commit {task_id} \"<short title>\"")
+    print("3. Then run:")
     print()
-    print(f"   dreamteam update-task {task_id} done")
-    print("   dreamteam task-counter")
-    print("   dreamteam run-next")
+    print(f"   python -m dreamteam update-task {task_id} done")
+    print("   python -m dreamteam task-counter")
+    print("   python -m dreamteam run-next")
     print()
     print("3. If task_counter prints TRIGGER_RESEARCHER:")
-    print("   dreamteam task-counter -> Researcher agent -> dreamteam check-memory -> vector_index")
+    print("   python -m dreamteam task-counter -> Researcher agent -> python -m dreamteam check-memory -> vector-index")
     print()
-    print("4. For new session (every ~20-50 tasks): dreamteam verify-tasks first")
+    print("5. For new session (every ~20-50 tasks): python -m dreamteam verify-tasks first")
     print("=" * 60)
 
 

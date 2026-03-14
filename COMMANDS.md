@@ -26,13 +26,14 @@ Project root: 1) DREAMTEAM_PROJECT env 2) .dreamteam in cwd/parents 3) DreamTeam
 | Command | Description |
 |---------|-------------|
 | `dreamteam add-task <file\|id>` | Add or update single task from file or task ID |
-| `dreamteam run-next` | Verify, get next task, set in_progress, print instructions |
+| `dreamteam run-next` | git pull, verify, get next task, set in_progress, print instructions |
 | `dreamteam scheduler` | Get next task ID (or NONE) |
 | `dreamteam scheduler --list` | List all tasks |
 | `dreamteam scheduler --ready` | List ready tasks |
 | `dreamteam update-task <id> <status>` | Update status (todo, in_progress, done, blocked) |
 | `dreamteam verify-tasks` | Check DB ↔ files consistency |
 | `dreamteam sync-tasks` | Sync .dreamteam/tasks/ to DB |
+| `dreamteam git-commit <id> <msg>` | Add, commit, push for task (after Reviewer) |
 
 ## Task Counter & Triggers
 

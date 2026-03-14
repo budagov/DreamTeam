@@ -17,6 +17,7 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
 | **Researcher** | When `task_counter.py` prints `TRIGGER_RESEARCHER` | researcher |
 | **Meta Planner** | When `task_counter.py` prints `TRIGGER_META_PLANNER` | meta-planner |
 | **Auditor** | When `task_counter.py` prints `TRIGGER_AUDITOR` | auditor |
+| **Git-Ops** | After Reviewer approval (commit, push) | shell or run `python -m dreamteam git-commit <id> "<title>"` |
 
 ## Dispatch Flow
 
@@ -32,9 +33,10 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
    - Task requirements
    - Architecture rules
    - Reference: `.cursor/agents/reviewer.md`
-5. **On approval** — `python -m dreamteam update-task <id> done`; `python -m dreamteam task-counter`
-6. **If trigger** — Dispatch Researcher / Meta Planner / Auditor per task_counter output (reference `.cursor/agents/*.md`)
-7. **After TRIGGER_RESEARCHER** — Run `python -m dreamteam vector-index`, then `python -m dreamteam check-memory`
+5. **On approval** — Git commit & push: `python -m dreamteam git-commit <id> "<title>"` (or Git-Ops subagent)
+6. **Then** — `python -m dreamteam update-task <id> done`; `python -m dreamteam task-counter`
+7. **If trigger** — Dispatch Researcher / Meta Planner / Auditor per task_counter output (reference `.cursor/agents/*.md`)
+8. **After TRIGGER_RESEARCHER** — Run `python -m dreamteam vector-index`, then `python -m dreamteam check-memory`
 
 ## Subagent Prompt References
 
@@ -44,6 +46,7 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
 - Researcher → `.cursor/agents/researcher.md`
 - Meta Planner → `.cursor/agents/meta-planner.md`
 - Auditor → `.cursor/agents/auditor.md`
+- Git-Ops → `.cursor/agents/git-ops.md`
 
 ## Resume Workflow (new session / after break)
 

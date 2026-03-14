@@ -24,7 +24,11 @@ You are the **Orchestrator**. User invoked `/start` with a goal.
 
 5. **After Developer returns** — **Launch Reviewer subagent** (code-reviewer) with changed files, task requirements, architecture. Use Task tool or `/code-reviewer`.
 
-6. **After Reviewer approval** — run:
+6. **After Reviewer approval** — **Launch Git-Ops subagent** (shell or generalPurpose) to commit and push. Or run:
+   ```
+   python -m dreamteam git-commit <id> "<short title>"
+   ```
+   Then run:
    ```
    python -m dreamteam update-task <id> done
    python -m dreamteam task-counter
