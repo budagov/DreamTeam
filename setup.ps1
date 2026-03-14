@@ -1,8 +1,8 @@
-# DreamTeam — one-command setup after clone
+# DreamTeam — install engine only (no project here)
 # Run from DreamTeam folder: .\setup.ps1
 
 $ErrorActionPreference = "Stop"
-Write-Host "DreamTeam setup..." -ForegroundColor Cyan
+Write-Host "DreamTeam setup (engine only)..." -ForegroundColor Cyan
 
 pip install -e .
 if ($LASTEXITCODE -ne 0) { exit 1 }
@@ -12,13 +12,9 @@ Write-Host "Verifying..." -ForegroundColor Cyan
 python -m dreamteam 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-if (-not (Test-Path ".dreamteam")) {
-    Write-Host ""
-    Write-Host "Creating project..." -ForegroundColor Cyan
-    python -m dreamteam new-project .
-    if ($LASTEXITCODE -ne 0) { exit 1 }
-}
-
 Write-Host ""
-Write-Host "Ready. For a CLEAN project: cd your-folder; dreamteam new-project ." -ForegroundColor Green
-Write-Host "  Or open this folder in Cursor for quick try: /start + goal, dreamteam run-next" -ForegroundColor Gray
+Write-Host "Installed. Create project in a SEPARATE folder:" -ForegroundColor Green
+Write-Host "  cd C:\Projects\my-app" -ForegroundColor White
+Write-Host "  dreamteam new-project ." -ForegroundColor White
+Write-Host ""
+Write-Host "Do NOT use DreamTeam folder as project — engine and project stay separate." -ForegroundColor Yellow

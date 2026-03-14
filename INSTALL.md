@@ -1,17 +1,16 @@
 # DreamTeam Install
 
-## Clean project (standard workflow)
+## Workflow (engine ≠ project)
 
-Engine is a library. Project folder stays minimal.
+DreamTeam folder = engine. Your project = separate folder. Never mix.
 
 ```powershell
-# 1. Install DreamTeam (one-time)
+# 1. Install engine (one-time)
 git clone https://github.com/budagov/DreamTeam.git
 cd DreamTeam
-pip install -e .
-# or: .\setup.ps1   # also creates project in DreamTeam folder (for quick try)
+.\setup.ps1   # installs only, does NOT create project here
 
-# 2. Create project in a clean folder
+# 2. Create project in a SEPARATE folder
 cd C:\Projects\my-app
 dreamteam new-project .
 
