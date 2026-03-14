@@ -74,7 +74,24 @@ def main() -> None:
     task_id = (r.stdout or "").strip()
 
     if not task_id or task_id.upper() == "NONE":
+        # Diagnostic: show project root and task count when "complete"
+        total = 0
+        try:
+            import sqlite3
+            db_path = project.get_db_path()
+            if os.path.exists(db_path):
+                conn = sqlite3.connect(db_path)
+                cur = conn.cursor()
+                cur.execute("SELECT COUNT(*) FROM tasks")
+                total = cur.fetchone()[0]
+                conn.close()
+        except Exception:
+            pass
         print("All tasks complete.")
+        print(f"  Project: {PROJECT_ROOT}")
+        print(f"  Tasks in DB: {total}")
+        if total == 0:
+            print("  Hint: No tasks. Run from project folder or set DREAMTEAM_PROJECT=<path>")
         return
 
     # 4. Set in progress

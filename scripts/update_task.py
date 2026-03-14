@@ -46,7 +46,7 @@ def update_status(task_id: str, status: str, owner: str | None = None, sync_file
         print("Database not found. Run: dreamteam init-db", file=sys.stderr)
         return False
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10.0)
     cursor = conn.cursor()
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 

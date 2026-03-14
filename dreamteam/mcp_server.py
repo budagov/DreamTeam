@@ -12,7 +12,7 @@ from dreamteam.db_bridge import (
 
 mcp = FastMCP(
     "dreamteam-db",
-    description="DreamTeam database bridge. Tasks, memory, DAG for autonomous development.",
+    instructions="DreamTeam database bridge. Tasks, memory, DAG for autonomous development.",
 )
 
 

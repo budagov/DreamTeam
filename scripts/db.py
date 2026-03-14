@@ -12,7 +12,7 @@ DB_PATH = project.get_db_path()
 @contextlib.contextmanager
 def conn():
     """Context manager: yields (conn, cursor), auto-closes."""
-    c = sqlite3.connect(DB_PATH)
+    c = sqlite3.connect(DB_PATH, timeout=10.0)
     cur = c.cursor()
     try:
         yield c, cur

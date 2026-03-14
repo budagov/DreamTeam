@@ -62,7 +62,7 @@ def _ensure_content_column(cursor: sqlite3.Cursor) -> None:
 def add_task(task_data: dict, upsert: bool = True) -> bool:
     """Insert or update task in database."""
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10.0)
     cursor = conn.cursor()
 
     content = task_data.get("content", "")
