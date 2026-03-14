@@ -20,4 +20,5 @@ if (-not (Test-Path ".dreamteam")) {
 }
 
 Write-Host ""
-Write-Host "Ready. Open in Cursor, run /start + your goal, then dreamteam run-next" -ForegroundColor Green
+Write-Host "Ready. For a CLEAN project: cd your-folder; dreamteam new-project ." -ForegroundColor Green
+Write-Host "  Or open this folder in Cursor for quick try: /start + goal, dreamteam run-next" -ForegroundColor Gray

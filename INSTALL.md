@@ -1,31 +1,29 @@
 # DreamTeam Install
 
-## From clone (2 commands)
+## Clean project (standard workflow)
+
+Engine is a library. Project folder stays minimal.
 
 ```powershell
+# 1. Install DreamTeam (one-time)
 git clone https://github.com/budagov/DreamTeam.git
 cd DreamTeam
+pip install -e .
+# or: .\setup.ps1   # also creates project in DreamTeam folder (for quick try)
 
-.\setup.ps1
-# Linux/Mac: ./setup.sh
-```
-
-Setup installs dreamteam and creates project (`.dreamteam/`, `.cursor/`). Open folder in Cursor, run `/start` + goal, then `dreamteam run-next`.
-
-## Separate project folder
-
-To use DreamTeam for a different folder:
-
-```powershell
-cd C:\Projects\my-project
+# 2. Create project in a clean folder
+cd C:\Projects\my-app
 dreamteam new-project .
-dreamteam run-next
+
+# 3. Open my-app in Cursor, run /start + goal, dreamteam run-next
 ```
+
+Result: `my-app/` contains only `.dreamteam/`, `.cursor/`, and your code. No engine files.
 
 ## Project structure
 
 ```
-project/
+my-app/
 ├── .dreamteam/   # db, memory, tasks, docs
 ├── .cursor/      # agents, rules
 └── src/          # your code

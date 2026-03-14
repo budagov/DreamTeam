@@ -14,4 +14,5 @@ if [ ! -d .dreamteam ]; then
     python -m dreamteam new-project .
 fi
 echo ""
-echo "Ready. Open in Cursor, run /start + your goal, then dreamteam run-next"
+echo "Ready. For a CLEAN project: cd your-folder && dreamteam new-project ."
+echo "  Or open this folder in Cursor for quick try: /start + goal, dreamteam run-next"

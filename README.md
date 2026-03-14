@@ -15,21 +15,24 @@ Goal → Planner → Task DAG → Scheduler → Composer Agents → Testing → 
 
 ## Quick Start
 
+**Clean project (recommended):** engine as library, project folder stays minimal.
+
 ```bash
-# 1. Clone
+# 1. Install DreamTeam once (clone + install)
 git clone https://github.com/budagov/DreamTeam.git
 cd DreamTeam
+pip install -e .          # or: .\setup.ps1  /  ./setup.sh
 
-# 2. Setup (installs + creates project)
-./setup.sh          # Linux/Mac
-# or: .\setup.ps1   # Windows PowerShell
+# 2. Create your project in a clean folder
+cd C:\Projects\my-app     # empty folder
+dreamteam new-project .
 
-# 3. Open in Cursor → /start + your goal → dreamteam run-next
+# 3. Open my-app in Cursor → /start + goal → dreamteam run-next
 ```
 
-Setup creates `.dreamteam/` (db, memory, tasks) and `.cursor/`. Open folder in Cursor, run **`/start`** + goal, then `dreamteam run-next`.
+Result: `my-app/` has only `.dreamteam/`, `.cursor/`, and your `src/` — no engine code in the project.
 
-**Or:** `python -m dreamteam` if `dreamteam` not in PATH. See [INSTALL.md](INSTALL.md).
+**Quick try:** run `.\setup.ps1` inside DreamTeam folder to use it as both engine and project (for testing only).
 
 ## Documentation
 
