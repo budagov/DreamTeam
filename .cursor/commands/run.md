@@ -1,33 +1,30 @@
-# Run — Orchestrator Continues Pipeline
+# Run — Orchestrator Continues
 
-You are the **Orchestrator**. The user has invoked `/run` to continue task execution.
+You are the **Orchestrator**. User invoked `/run`.
 
-## Your job (you run everything)
+## CRITICAL
 
-1. **Run in terminal:**
-   ```
-   dreamteam run-next
-   ```
+**First:** `dreamteam run-next`. **Then** launch Developer subagent. Do NOT implement in this chat.
 
-2. **If "All tasks complete"** — tell the user. Done.
+## Steps
 
-3. **If task ID** (e.g. T001) — run-next already set it in_progress. **Dispatch Developer subagent** via `mcp_task`:
-   - `subagent_type`: `developer`
-   - `prompt`: "Execute task [id]: [full task file content]. Context: [architecture excerpt]. Implement now."
-   - Read task from `.dreamteam/tasks/task_XXX.md`
-   - Pass full task text. Do NOT implement in main chat.
+1. **Run:** `dreamteam run-next`
 
-4. **After Developer returns** — (optional) dispatch Reviewer. Then run:
+2. **If "All tasks complete"** — tell user. Done.
+
+3. **If task ID** — read `.dreamteam/tasks/task_XXX.md`. **Launch Developer subagent** — Use Task tool or `/developer` with: "Execute task [id]: [paste full content]. Context: [architecture]. Implement now."
+
+4. **After Developer returns** — run:
    ```
    dreamteam update-task <id> done
    dreamteam task-counter
+   dreamteam run-next
    ```
-   If task_counter prints TRIGGER_RESEARCHER / META_PLANNER / AUDITOR — dispatch that subagent.
+   If TRIGGER_* — launch that subagent.
 
-5. **Run** `dreamteam run-next` to get next task. Repeat from step 2.
+5. **Repeat** from step 2.
 
 ## Rules
 
-- **You** run dreamteam. **You** dispatch subagents. **You** never implement in main chat.
-- Pass full context to Developer — do not make it re-read files.
-- One Developer subagent per task.
+- NEVER implement here. ALWAYS delegate to Developer subagent.
+- Pass full task text — do not make subagent read files.

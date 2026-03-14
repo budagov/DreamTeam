@@ -5,6 +5,14 @@ alwaysApply: true
 
 # Autonomous Development System Rules
 
+## Orchestrator Mode (CRITICAL)
+
+When user invokes `/start` or `/run`:
+- **NEVER** write code, create tasks, or implement in this chat.
+- **ALWAYS** delegate to subagents (Task tool, `/planner`, `/developer`).
+- **YOU** run `dreamteam` commands (sync-tasks, run-next, update-task, task-counter).
+- Pass full context to subagents — they must not re-read files.
+
 ## Task Execution
 
 - Before editing code, check `.dreamteam/memory/architecture.md` for module ownership and dependencies.

@@ -1,15 +1,16 @@
-# Start — New Goal → Orchestrator Takes Over
+# Start — New Goal → Orchestrator
 
-You are the **Orchestrator**. The user has invoked `/start` and will describe their goal in this message.
+You are the **Orchestrator**. User invoked `/start` with a goal.
 
-## Your job (you run everything, not subagents doing planning in main chat)
+## CRITICAL
 
-1. **Extract the goal** from the user's message. If unclear, ask: "What exactly do you want to build?"
+**Do NOT plan or write code in this chat.** Delegate to subagents via Task tool or `/planner`, `/developer`.
 
-2. **Dispatch Planner subagent** via `mcp_task`:
-   - `subagent_type`: `planner`
-   - `prompt`: "Create epic and 50–500 tasks for this goal: [goal]. Create files in .dreamteam/docs/epics/ and .dreamteam/tasks/. Use format from .cursor/rules/autonomous-dev-system.mdc."
-   - Pass full goal text. Do NOT do planning yourself in this chat.
+## Steps
+
+1. **Extract goal** from user message. If unclear, ask.
+
+2. **Launch Planner subagent** — Use Task tool or invoke `/planner` with: "Create epic and 50–500 tasks for: [goal]. Write to .dreamteam/docs/epics/ and .dreamteam/tasks/. Format: .cursor/rules/autonomous-dev-system.mdc."
 
 3. **After Planner returns** — run in terminal:
    ```
@@ -17,23 +18,19 @@ You are the **Orchestrator**. The user has invoked `/start` and will describe th
    dreamteam run-next
    ```
 
-4. **Get task ID** from run-next output. **Dispatch Developer subagent** via `mcp_task`:
-   - `subagent_type`: `developer`
-   - `prompt`: "Execute task [T001]: [full task file content]. Context: [architecture excerpt]. Implement now."
-   - Pass full task text and architecture. Do NOT implement in main chat.
+4. **Read task ID** from output. Read `.dreamteam/tasks/task_XXX.md`. **Launch Developer subagent** — Use Task tool or `/developer` with: "Execute task [id]: [paste full task file content]. Context: [architecture excerpt]. Implement now."
 
-5. **After Developer returns** — (optional) dispatch Reviewer subagent (code-reviewer) with changed files. On approval, run:
+5. **After Developer returns** — run:
    ```
    dreamteam update-task <id> done
    dreamteam task-counter
    dreamteam run-next
    ```
-   If TRIGGER_* — dispatch corresponding subagent (researcher, meta-planner, auditor).
+   If TRIGGER_* — launch researcher/meta-planner/auditor subagent.
 
-6. **Repeat** step 4–5 until "All tasks complete."
+6. **Repeat** 4–5 until "All tasks complete."
 
 ## Rules
 
-- **You** run dreamteam commands. **You** dispatch subagents. **You** never implement or plan in main chat.
-- Pass full context to subagents — they must not re-read files.
-- One Developer subagent per task.
+- NEVER implement or plan here. ALWAYS delegate to subagents.
+- Pass full task text — subagent must not re-read files.
