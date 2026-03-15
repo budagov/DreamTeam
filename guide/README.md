@@ -74,7 +74,7 @@ The system is built for **self-sustaining execution** over 500–1000+ tasks. Th
 
 ### 2. RAG (Retrieval-Augmented Context)
 
-- **Memory in DB** — `summaries`, `architecture`, `goal` live in SQLite. Researcher writes via `memory-set`; Orchestrator syncs to files with `memory-to-files`. **Goal** — stored at /start via `set-goal`; FixPlanner verifies plan changes against it.
+- **Memory in DB** — `summaries`, `architecture`, `goal` live in SQLite. Researcher writes via `memory-set`; Left/Right sync to files with `memory-to-files`. **Goal** — stored at /start via `set-goal`; FixPlanner verifies plan changes against it.
 - **Vector search (Qdrant)** — `pip install dreamteam[vector]` enables `vector-index` and `vector-search`. Uses Qdrant: local storage (`.dreamteam/db/qdrant/`) by default, or `QDRANT_URL` for server. Used by Researcher for 100+ task projects and large knowledge bases.
 - **Compression** — Researcher replaces, not appends. Keeps context bounded (~150 lines summaries) so context never explodes.
 
@@ -89,14 +89,14 @@ The system is built for **self-sustaining execution** over 500–1000+ tasks. Th
 | 50            | Meta Planner| Optimize DAG, resplit tasks, tech debt       |
 | 200           | Auditor     | Architecture audit, duplicates, dependencies|
 
-**Trigger flow:** `update-task <id> done` increments `tasks_completed` and prints `TRIGGER_*` when count is divisible. Orchestrator dispatches the corresponding agent. No manual checkpoint.
+**Trigger flow:** `update-task <id> done` increments `tasks_completed` and prints `TRIGGER_*` when count is divisible. Left/Right dispatch the corresponding agent (Learning, Researcher, Meta Planner, Auditor). No manual checkpoint.
 
-**Effect:** Context stays compressed, DAG stays optimized, architecture stays coherent. The chain never breaks; Orchestrator always knows the next step.
+**Effect:** Context stays compressed, DAG stays optimized, architecture stays coherent. The chain never breaks; Left/Right always know the next step.
 
 ### Flow Continuity (Nothing Drops)
 
 - **run-next** — Auto-runs `sync-tasks` if verify fails; fixes `tasks_completed` drift; always returns next task or "All tasks complete".
-- **update-task done** — Increments counter, prints `TRIGGER_*` when divisible. Orchestrator reacts immediately.
+- **update-task done** — Increments counter, prints `TRIGGER_*` when divisible. Left/Right react immediately.
 - **recover** — Syncs tasks, fixes drift, resets stuck (>60 min in_progress), verifies integrity. Use after crash or mismatch.
 - **Strict sequence** — Developer → Reviewer → DevExperiencer → Git-Ops → update-task → run-next. No parallel agents; one command at a time.
 

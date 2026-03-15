@@ -6,12 +6,16 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 
 **Full details:** `.cursor/agents/orchestrator.md`
 
-**When to dispatch subagents:**
-- **Planner** — New goal in chat, epic decomposition, task breakdown
-- **Planner-Sub** — Expand one epic into 15–25 subtasks — **Planner dispatches**, not Orchestrator
-- **Left** — Sub-orchestrator, 33 tasks (Orchestrator dispatches via orchestrator-left)
-- **Right** — Sub-orchestrator, 33 tasks (Orchestrator dispatches via orchestrator-right)
-- **DevExperiencer** — Records production history after Reviewer (dev-experiencer)
+**Main Orchestrator** (when /start or /run): ONLY dispatches **Left** or **Right**. Does NOT dispatch Developer, Planner, Reviewer, etc. — Left and Right do that.
+
+**Left/Right** dispatch: Planner, Developer, Reviewer, DevExperiencer, Git-Ops, Learning, FixPlanner, Researcher, Meta Planner, Auditor, Terminal.
+
+**When to dispatch:**
+- **Left** — Main Orchestrator dispatches (orchestrator-left). Left runs 33 tasks (planning or execution).
+- **Right** — Main Orchestrator dispatches (orchestrator-right). Right runs 33 tasks.
+- **Planner** — Left/Right dispatch (planner). Planner breaks into epics, dispatches Sub-Planner.
+- **Planner-Sub** — Planner dispatches (planner-sub), not Orchestrator
+- **DevExperiencer** — Left/Right dispatch after Reviewer (dev-experiencer)
 - **Learning** — Every 10 tasks, or on cyclic failure (task blocked after 2 Critical retries). Analyzes DevExperience, updates Developer, dispatches FixPlanner (learning)
 - **FixPlanner** — Corrects tasks based on Learning analysis (fix-planner)
 - **Developer** — Task from scheduler ready for implementation
@@ -25,23 +29,19 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 
 **How to dispatch:**
 - Use `mcp_task` with `subagent_type`: `developer`, `code-reviewer`, `planner`, `planner-sub`, `researcher`, `meta-planner`, `auditor`, `git-ops`, `shell` (Terminal), `orchestrator-left`, `orchestrator-right`, `dev-experiencer`, `learning`, `fix-planner`
-- Git-Ops is the ONLY agent that does commits. Developer, Reviewer use MCP dreamteam_get_task (or Terminal) for task content. Orchestrator uses Terminal for run-next, sync-tasks, update-task.
+- Git-Ops is the ONLY agent that does commits. Main Orchestrator runs NO Terminal — Left/Right do ALL Terminal work.
 - For Developer: include task ID, `.dreamteam/memory/architecture.md` snippet
 - For Reviewer: include changed files, task ID, architecture rules (Reviewer uses Terminal get-task for task content)
 
-**Workflow:**
-1. Terminal → `python -m dreamteam run-next` → get next task ID
-2. Dispatch Developer subagent with task ID (Developer uses Terminal for get-task, pytest)
-3. After implementation → dispatch Reviewer subagent (code-reviewer)
-4. On approval → Git-Ops (commit) → Terminal: update-task done, run-next
-5. Then → `python -m dreamteam update-task <id> done` (auto-increments, TRIGGER_*); `python -m dreamteam run-next`
-6. If trigger fired → dispatch corresponding subagent (Researcher/Meta Planner/Auditor)
+**Main Orchestrator workflow:** verify-tasks → set-goal → Dispatch Left → (Left returns BATCH_DONE) → Dispatch Right → alternate until ALL_COMPLETE.
+
+**Left/Right workflow:** run-next → Developer → Reviewer → DevExperiencer → Git-Ops → update-task done. TRIGGER_* → Learning/Researcher/Meta Planner/Auditor.
 
 ## Agent Prompts
 
 | Role | Prompt File | When to Use |
 |------|-------------|-------------|
-| Orchestrator | `.cursor/agents/orchestrator.md` | Dispatches Developer, Reviewer, Left, Right. One orchestrator. |
+| Orchestrator | `.cursor/agents/orchestrator.md` | ONLY dispatches Left/Right. Left/Right do all subagent orchestration. |
 | Left | `.cursor/agents/orchestrator-left.md` | Sub-orchestrator, 33 tasks per batch |
 | Right | `.cursor/agents/orchestrator-right.md` | Sub-orchestrator, 33 tasks per batch |
 | Planner | `.cursor/agents/planner.md` | New goal, epic, or task decomposition |
@@ -77,7 +77,7 @@ Project skills in `.cursor/skills/`:
 
 - `.cursor/rules/autonomous-dev-system.mdc` — Always apply
 - `.cursor/rules/task-execution.mdc` — When editing `.dreamteam/tasks/**/*.md`
-- `.cursor/agents/orchestrator.md` — When dispatching Developer/Reviewer/Planner (load this prompt)
+- `.cursor/agents/orchestrator.md` — Main Orchestrator: only Left/Right. Load when /start or /run.
 
 ## Commands
 

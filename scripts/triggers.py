@@ -5,3 +5,5 @@ TRIGGER_RESEARCHER = 20
 TRIGGER_META_PLANNER = 50
 TRIGGER_AUDITOR = 200
 TRIGGER_LEARNING = 10
+# Return BATCH_DONE to switch Left↔Right before context overflow. Left/Right check task_counter output.
+TRIGGER_BATCH_SWITCH = 15

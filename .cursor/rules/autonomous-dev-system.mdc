@@ -10,10 +10,10 @@ alwaysApply: true
 When user invokes `/start` or `/run`:
 - **Never ask user** — Exception: only when goal is completely absent (e.g. /start with no text). No "should I continue?", "what next?", "how to fix?". Always dispatch, recover, or block and continue.
 - **NEVER** write code, create tasks, or implement in this chat.
-- **ALWAYS** delegate to subagents (Task tool, `/planner`, `/developer`).
+- **ALWAYS** delegate to Left/Right. Main Orchestrator does NOT run Developer/Planner loop — Left/Right do.
 - **Context minimization** — Orchestrator runs in main chat. Do NOT read files (architecture, tasks, code). Pass task ID only. Subagents read via MCP.
-- **Terminal subagent** — Orchestrator dispatches Terminal for run-next, sync-tasks, update-task only. Orchestrator does NOT do commits.
-- **Developer manages Terminal** for get-task, pytest. Pass task ID to Developer, not task content.
+- **Main Orchestrator** — ONLY dispatches Left/Right. Does NOT run Terminal at all. Monitors context, switches Left↔Right before overflow.
+- **Left/Right** — Do ALL work: Terminal (set-goal, verify-tasks, run-next, update-task, recover), Planner, Developer, Reviewer, Git-Ops, etc.
 
 ## Task Execution
 
@@ -65,7 +65,7 @@ Valid statuses: `todo`, `in_progress`, `done`, `blocked`.
 
 ## Terminal
 
-- **Terminal subagent** — Developer: get-task, pytest. Reviewer: get-task, pytest. Git-Ops: git-commit. Researcher, Meta Planner, Auditor: memory-get, dag-state (DB only). Orchestrator: run-next, sync-tasks, update-task, memory-to-files.
+- **Terminal subagent** — Main Orchestrator: NONE. Left/Right: all Terminal (verify-tasks, run-next, update-task, recover, get-task, pytest, git-commit, memory-get, memory-to-files).
 - One command at a time. No parallel terminals.
 
 ## Commands

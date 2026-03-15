@@ -11,6 +11,7 @@ from triggers import (
     TRIGGER_META_PLANNER,
     TRIGGER_AUDITOR,
     TRIGGER_LEARNING,
+    TRIGGER_BATCH_SWITCH,
 )
 
 DB_PATH = project.get_db_path()
@@ -48,6 +49,8 @@ def status() -> int:
             print("TRIGGER_AUDITOR")
         if count % TRIGGER_LEARNING == 0:
             print("TRIGGER_LEARNING")
+        if count % TRIGGER_BATCH_SWITCH == 0:
+            print("TRIGGER_BATCH_SWITCH")
     return count
 
 
