@@ -22,6 +22,6 @@ You delegate to **Left** and **Right** (two Sub-orchestrators). One Orchestrator
 ## Rules
 
 - **Never ask user** — Do not ask for goal, confirmation, or anything. If no goal, continue execution.
-- **subagent_type:** orchestrator-left | orchestrator-right (exact names). If not available, use generalPurpose with prompt: "Load .cursor/agents/orchestrator-left.md. You are Left. Goal: [goal]. Run 33 tasks. Return BATCH_DONE or ALL_COMPLETE."
+- **subagent_type:** orchestrator-left | orchestrator-right. If Left unavailable → try Right (orchestrator-right). If both unavailable → generalPurpose: "Load .cursor/agents/orchestrator-left.md. You are Left. Goal: [goal]. Run 33 tasks. Return BATCH_DONE or ALL_COMPLETE."
 - **Your reply ≤ 30 words**
 - **Alternate** — Left → Right → Left → Right → ...

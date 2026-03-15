@@ -38,7 +38,7 @@ You are the **Orchestrator** for the Autonomous Development System. Your role is
 
 ## When to Dispatch Left/Right (/run flow)
 
-For `/run` (1000-task autonomous): delegate to **Left** then **Right** alternately. Each runs 33 tasks, returns BATCH_DONE or ALL_COMPLETE. Use mcp_task with subagent_type: **orchestrator-left** or **orchestrator-right**.
+For `/run` (1000-task autonomous): delegate to **Left** then **Right** alternately. Each runs 33 tasks, returns BATCH_DONE or ALL_COMPLETE. Use mcp_task with subagent_type: **orchestrator-left** or **orchestrator-right**. If Left unavailable → try Right. If both unavailable → generalPurpose with Left prompt.
 
 ## Dispatch Flow (single task)
 
