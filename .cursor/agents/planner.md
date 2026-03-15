@@ -36,13 +36,15 @@ Each task must be **small**:
 ## Output
 
 1. **Task files** in `.dreamteam/tasks/task_XXX.md` (format: `.cursor/rules/autonomous-dev-system.mdc`)
-2. **Epic docs** (optional) in `.dreamteam/docs/epics/` for high-level breakdown
-3. **Architecture updates** in `.dreamteam/memory/architecture.md` if new modules are introduced
+2. **Goal** — Orchestrator runs `set-goal` before planning; goal is stored in DB for FixPlanner to verify plan changes against
+3. **Epic docs** (optional) in `.dreamteam/docs/epics/` for high-level breakdown
+4. **Architecture updates** in `.dreamteam/memory/architecture.md` if new modules are introduced
 
 Orchestrator runs `sync-tasks` after Planner returns — syncs files to DB. Planner creates files only.
 
 ## Rules
 
+- **Never ask user** — If goal is vague, create best-effort tasks. Do not ask for clarification.
 - **T001 must have dependencies: []** — First task. Scheduler returns first todo with deps satisfied; T001 starts the flow.
 - No circular dependencies in the DAG
 - Dependencies must reference existing task IDs

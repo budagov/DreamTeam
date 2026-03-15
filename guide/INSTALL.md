@@ -51,3 +51,25 @@ Then set `DREAMTEAM_PROJECT` when working from another folder:
 $env:DREAMTEAM_PROJECT = "C:\Projects\my-project"
 python -m dreamteam run-next
 ```
+
+## Vector search (Qdrant)
+
+For 100+ tasks or large knowledge bases, install vector support:
+
+```powershell
+pip install dreamteam[vector]
+```
+
+**Default: local mode** — No Docker. Data stored in `.dreamteam/db/qdrant/`. Works out of the box.
+
+**Optional: Qdrant server** (for shared/remote use):
+
+```powershell
+# Run Qdrant in Docker
+docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+
+# Use server
+$env:QDRANT_URL = "http://localhost:6333"
+python -m dreamteam vector-index
+python -m dreamteam vector-search "your query"
+```

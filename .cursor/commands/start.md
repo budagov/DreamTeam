@@ -10,23 +10,28 @@ You are the **Orchestrator**. User invoked `/start` with a goal.
 
 ## Steps
 
-1. **Extract goal** from user message. If unclear, ask.
+1. **Extract goal** from user message. **Ask user ONLY if goal is completely absent** (e.g. user said /start with no text). Never ask for anything else — no "should I continue?", "what next?", etc.
+2. **Save goal** — Terminal → `python -m dreamteam set-goal "goal text"` (or `set-goal --file .dreamteam/memory/goal.md` if Planner created it). Goal is stored in DB for FixPlanner to verify plan changes against.
 
-2. **Planning (choose one):**
+3. **Planning (choose one):**
    - **<500 tasks:** Launch Planner — "Create 200–250 tasks for: [goal]. Small tasks: 1–3 files, ~15–30 min. Write to .dreamteam/tasks/. T001 dependencies: []." After return: sync-tasks. If more needed, Planner again.
-   - **500+ tasks:** Load orchestrator-main.md. **Dispatch Left** with goal. Left: Planner (epic outline) → Sub-Planner per epic until 33 → sync-tasks → BATCH_DONE. Main hands off to Right. Right: Sub-Planner next epics until 33. Alternate until all planned. Then execution (Left 33, Right 33).
-3. **After planning done** — Terminal: `sync-tasks` (if not done by Left/Right).
-4. **Then** — Terminal: `run-next`, read task ID. (First task is always T001.)
+   - **500+ tasks:** **Dispatch Left** (orchestrator-left) with goal. Left: Planner (epic outline) → Sub-Planner per epic until 33 → sync-tasks → BATCH_DONE. Then dispatch **Right** (orchestrator-right). Alternate Left ↔ Right until all planned and executed.
+4. **After planning done** — Terminal: `sync-tasks` (if not done by Left/Right). Ensure goal is in DB (set-goal if not done by Planner).
+5. **Then** — Terminal: `run-next`, read task ID. (First task is always T001.)
 
-5. **Launch Developer subagent** — "Execute task [id]. Use MCP dreamteam_get_task for content, pytest via Terminal."
-6. **After Developer returns** — **Launch Reviewer subagent** (code-reviewer): "Review task [id]. Use MCP dreamteam_get_task for spec."
-7. **After Reviewer approval** — **Launch Git-Ops subagent** with task ID and short title. After Git-Ops returns — **Terminal**: `update-task [id] done`, then `run-next`. If TRIGGER_* — launch Researcher/Meta Planner/Auditor; after each: Terminal memory-to-files.
+6. **Launch Developer subagent** — "Execute task [id]. Use MCP dreamteam_get_task for content, pytest via Terminal."
+7. **After Developer returns** — If Developer returns "DONE. BLOCKED:" or error → Terminal: update-task [id] blocked, run-next. Else → **Launch Reviewer** (code-reviewer): "Review task [id]. Use MCP dreamteam_get_task for spec."
+8. **After Reviewer returns** — **Launch DevExperiencer** — "Record task [id]. Reviewer: [approved|critical]. Attempts: [N]."
+9. **After DevExperiencer returns** — If approved: **Launch Git-Ops**. If COMMITTED → Terminal: `update-task [id] done`, `run-next`. If COMMIT_FAILED → Terminal: `update-task [id] blocked`, `run-next`. If Critical: Developer fix (max 2 retries). **After 2 retries (cyclic failure)** → **Launch Learning** first: "Task [id] blocked after 2 Critical. Critical: [points]. Update Developer, dispatch FixPlanner." Then Terminal: `update-task [id] blocked`, `run-next`. Never ask user.
+10. **If update-task prints TRIGGER_LEARNING** — Launch Learning; Learning may dispatch FixPlanner.
+11. **If TRIGGER_RESEARCHER / TRIGGER_META_PLANNER / TRIGGER_AUDITOR** — Launch corresponding agent; after each: Terminal memory-to-files.
 
-8. **Repeat** 5–8 until "All tasks complete."
+12. **Repeat** 6–12 until "All tasks complete."
 
 ## Rules
 
 - NEVER implement or plan here. ALWAYS delegate to subagents.
-- **Never interrupt** — After Planner returns, do not ask user. Loop Developer→Reviewer→Git-Ops until "All tasks complete."
+- **Never ask user** — Except when goal is absent. No "should I continue?", "what next?", "how to fix?". Always dispatch next step or run recover.
+- **Never interrupt** — Loop Developer→Reviewer→DevExperiencer→Git-Ops until "All tasks complete."
 - **Terminal subagent ONLY** — All dreamteam/git commands via Terminal. No parallel terminals.
 - **NO parallelism** — One subagent at a time. One Terminal command at a time.

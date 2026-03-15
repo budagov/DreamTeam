@@ -10,7 +10,6 @@ if _SCRIPTS_DIR not in sys.path:
 
 import project  # noqa: E402
 
-DB_PATH = project.get_db_path
 TASKS_DIR = project.get_tasks_dir
 MEMORY_DIR = project.get_memory_dir
 get_project_root = project.get_project_root
@@ -42,30 +41,5 @@ def get_dag_state() -> dict:
 
 def get_recent_tasks(limit: int = 20) -> list[dict]:
     """Get last N done tasks from DB."""
-    import sqlite3
-    path = project.get_db_path()
-    if not os.path.exists(path):
-        return []
-    conn = sqlite3.connect(path, timeout=10.0)
-    cursor = conn.cursor()
-    try:
-        cursor.execute("PRAGMA table_info(tasks)")
-        has_content = any(col[1] == "content" for col in cursor.fetchall())
-        if has_content:
-            cursor.execute(
-                "SELECT id, title, content FROM tasks WHERE status = 'done' ORDER BY updated_at DESC LIMIT ?",
-                (limit,),
-            )
-        else:
-            cursor.execute(
-                "SELECT id, title, '' FROM tasks WHERE status = 'done' ORDER BY updated_at DESC LIMIT ?",
-                (limit,),
-            )
-        rows = cursor.fetchall()
-    except sqlite3.OperationalError:
-        rows = []
-    conn.close()
-    return [
-        {"id": r[0], "title": r[1], "excerpt": (r[2] or "")[:500] if len(r) > 2 else ""}
-        for r in rows
-    ]
+    from db_utils import get_recent_tasks as _get
+    return _get(limit)

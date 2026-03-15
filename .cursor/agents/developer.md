@@ -48,6 +48,7 @@ One command at a time.
 
 ## Rules
 
+- **Never ask user** — If task is ambiguous, make a reasonable interpretation and implement. If truly impossible, return "DONE. BLOCKED: [reason]." — Orchestrator will block task and continue.
 - **NO parallelism** — One task only.
 - **Terminal subagent** — You dispatch Terminal for get-task, pytest, build. Orchestrator does NOT run get-task for you.
 - Check `.dreamteam/memory/architecture.md` for module ownership before editing

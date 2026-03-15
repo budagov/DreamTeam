@@ -9,7 +9,7 @@ import project
 DB_PATH = project.get_db_path()
 MEMORY_DIR = project.get_memory_dir()
 
-VALID_KEYS = ("summaries", "architecture")
+VALID_KEYS = ("summaries", "architecture", "goal")
 
 
 def set_memory(key: str, content: str) -> bool:
@@ -20,33 +20,35 @@ def set_memory(key: str, content: str) -> bool:
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     import sqlite3
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    # Ensure memory table exists
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS memory (
-            key TEXT PRIMARY KEY,
-            content TEXT,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        # Ensure memory table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS memory (
+                key TEXT PRIMARY KEY,
+                content TEXT,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute(
+            """
+            INSERT INTO memory (key, content, updated_at) VALUES (?, ?, ?)
+            ON CONFLICT(key) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at
+            """,
+            (key, content, now),
         )
-    """)
-
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute(
-        """
-        INSERT INTO memory (key, content, updated_at) VALUES (?, ?, ?)
-        ON CONFLICT(key) DO UPDATE SET content = excluded.content, updated_at = excluded.updated_at
-        """,
-        (key, content, now),
-    )
-    conn.commit()
-    conn.close()
+        conn.commit()
+    finally:
+        conn.close()
     return True
 
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python memory_set.py <summaries|architecture> [file]", file=sys.stderr)
+        print("Usage: python memory_set.py <summaries|architecture|goal> [file]", file=sys.stderr)
         print("  Reads from stdin if no file, else from file.", file=sys.stderr)
         sys.exit(1)
 

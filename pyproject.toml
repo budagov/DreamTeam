@@ -14,7 +14,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-vector = ["sentence-transformers>=2.2.0", "numpy>=1.24.0"]
+vector = [
+    "sentence-transformers>=2.2.0",
+    "numpy>=1.24.0",
+    "qdrant-client>=1.7.0",
+]
 dev = ["pytest>=7.0"]
 
 [project.scripts]

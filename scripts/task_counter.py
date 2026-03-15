@@ -6,11 +6,14 @@ import os
 import sys
 
 import project
-DB_PATH = project.get_db_path()
+from triggers import (
+    TRIGGER_RESEARCHER,
+    TRIGGER_META_PLANNER,
+    TRIGGER_AUDITOR,
+    TRIGGER_LEARNING,
+)
 
-TRIGGER_RESEARCHER = 20
-TRIGGER_META_PLANNER = 50
-TRIGGER_AUDITOR = 200
+DB_PATH = project.get_db_path()
 
 
 def get_count(cursor: sqlite3.Cursor) -> int:
@@ -27,11 +30,13 @@ def status() -> int:
         return 0
 
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
-    count = get_count(cursor)
-    cursor.execute("SELECT COUNT(*) FROM tasks")
-    total = cursor.fetchone()[0]
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        count = get_count(cursor)
+        cursor.execute("SELECT COUNT(*) FROM tasks")
+        total = cursor.fetchone()[0]
+    finally:
+        conn.close()
 
     print(f"tasks_completed: {count} / {total}")
     if count > 0:
@@ -41,6 +46,8 @@ def status() -> int:
             print("TRIGGER_META_PLANNER")
         if count % TRIGGER_AUDITOR == 0:
             print("TRIGGER_AUDITOR")
+        if count % TRIGGER_LEARNING == 0:
+            print("TRIGGER_LEARNING")
     return count
 
 

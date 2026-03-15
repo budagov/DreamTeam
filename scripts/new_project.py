@@ -85,28 +85,30 @@ def create_project(path: str) -> str:
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     import sqlite3
     conn = sqlite3.connect(db_path, timeout=10.0)
-    c = conn.cursor()
-    for t in ("tasks", "metrics", "context_graph", "vector_code", "memory"):
-        c.execute(f"DROP TABLE IF EXISTS {t}")
-    conn.commit()
-    c.execute("""CREATE TABLE IF NOT EXISTS tasks (
-        id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER,
-        dependencies TEXT, owner TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)""")
-    c.execute("CREATE TABLE IF NOT EXISTS metrics (metric TEXT PRIMARY KEY, value INTEGER)")
-    c.execute("CREATE TABLE IF NOT EXISTS context_graph (module TEXT, functions TEXT, dependencies TEXT, embedding BLOB)")
-    c.execute("CREATE TABLE IF NOT EXISTS vector_code (path TEXT, chunk TEXT, embedding BLOB, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)")
-    c.execute("""CREATE TABLE IF NOT EXISTS memory (
-        key TEXT PRIMARY KEY, content TEXT, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)""")
-    c.execute("INSERT OR IGNORE INTO metrics (metric, value) VALUES ('tasks_completed', 0)")
-    # Seed memory from created files
-    for key, path in [("architecture", arch), ("summaries", summaries)]:
-        if os.path.exists(path):
-            with open(path, encoding="utf-8") as f:
-                content = f.read()
-            c.execute("INSERT OR REPLACE INTO memory (key, content, updated_at) VALUES (?, ?, datetime('now'))", (key, content))
-    conn.commit()
-    conn.close()
+    try:
+        c = conn.cursor()
+        for t in ("tasks", "metrics", "context_graph", "vector_code", "memory"):
+            c.execute(f"DROP TABLE IF EXISTS {t}")
+        conn.commit()
+        c.execute("""CREATE TABLE IF NOT EXISTS tasks (
+            id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER,
+            dependencies TEXT, owner TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)""")
+        c.execute("CREATE TABLE IF NOT EXISTS metrics (metric TEXT PRIMARY KEY, value INTEGER)")
+        c.execute("CREATE TABLE IF NOT EXISTS context_graph (module TEXT, functions TEXT, dependencies TEXT, embedding BLOB)")
+        c.execute("CREATE TABLE IF NOT EXISTS vector_code (path TEXT, chunk TEXT, embedding BLOB, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)")
+        c.execute("""CREATE TABLE IF NOT EXISTS memory (
+            key TEXT PRIMARY KEY, content TEXT, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)""")
+        c.execute("INSERT OR IGNORE INTO metrics (metric, value) VALUES ('tasks_completed', 0)")
+        # Seed memory from created files
+        for key, path in [("architecture", arch), ("summaries", summaries)]:
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as f:
+                    content = f.read()
+                c.execute("INSERT OR REPLACE INTO memory (key, content, updated_at) VALUES (?, ?, datetime('now'))", (key, content))
+        conn.commit()
+    finally:
+        conn.close()
 
     return root
 

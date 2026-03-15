@@ -27,9 +27,9 @@ def dreamteam_get_task(task_id: str) -> str:
 
 @mcp.tool()
 def dreamteam_get_memory(key: str) -> str:
-    """Get memory content from database. Key: 'summaries' or 'architecture'."""
-    if key not in ("summaries", "architecture"):
-        return f"Invalid key. Use: summaries, architecture"
+    """Get memory content from database. Key: 'summaries', 'architecture', or 'goal'."""
+    if key not in ("summaries", "architecture", "goal"):
+        return f"Invalid key. Use: summaries, architecture, goal"
     content = get_memory(key)
     if content:
         return content
@@ -38,9 +38,9 @@ def dreamteam_get_memory(key: str) -> str:
 
 @mcp.tool()
 def dreamteam_set_memory(key: str, content: str) -> str:
-    """Set memory content in database. Key: 'summaries' or 'architecture'."""
-    if key not in ("summaries", "architecture"):
-        return f"Invalid key. Use: summaries, architecture"
+    """Set memory content in database. Key: 'summaries', 'architecture', or 'goal'."""
+    if key not in ("summaries", "architecture", "goal"):
+        return f"Invalid key. Use: summaries, architecture, goal"
     if set_memory(key, content):
         return f"Memory {key} updated in DB."
     return f"Failed to update {key}."

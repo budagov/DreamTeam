@@ -28,9 +28,13 @@ SCRIPT_MAP = {
     "verify-sync": "verify_sync.py",
     "memory-get": "memory_get.py",
     "memory-set": "memory_set.py",
+    "set-goal": "set_goal.py",
     "memory-to-files": "memory_to_files.py",
     "recent-tasks": "recent_tasks.py",
     "dag-state": "meta_planner.py",
+    "init-dev-experience": "init_dev_experience.py",
+    "record-dev-experience": "record_dev_experience.py",
+    "dev-experience-history": "get_dev_experience_history.py",
 }
 
 

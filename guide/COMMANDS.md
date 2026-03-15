@@ -30,10 +30,10 @@ Project root: 1) DREAMTEAM_PROJECT env 2) .dreamteam in cwd/parents 3) DreamTeam
 | `dreamteam scheduler` | Get next task ID (or NONE) |
 | `dreamteam scheduler --list` | List all tasks |
 | `dreamteam scheduler --ready` | List ready tasks |
-| `dreamteam update-task <id> <status>` | Update status (todo, in_progress, done, blocked) |
+| `dreamteam update-task <id> <status>` | Update status (todo, in_progress, done, blocked, deprecated) |
 | `dreamteam verify-tasks` | Check DB ↔ files consistency |
 | `dreamteam verify-integrity` | Check tasks_completed, gaps, orphan deps |
-| `dreamteam sync-tasks` | Sync .dreamteam/tasks/ to DB |
+| `dreamteam sync-tasks` | Sync .dreamteam/tasks/ to DB (removed files → deprecated) |
 | `dreamteam verify-sync` | Verify tasks have content in DB |
 | `dreamteam git-commit <id> <msg>` | Add, commit, push for task (after Reviewer) |
 | `dreamteam get-task <id>` | Get task content from DB (Developer loads fresh) |
@@ -44,14 +44,15 @@ Project root: 1) DREAMTEAM_PROJECT env 2) .dreamteam in cwd/parents 3) DreamTeam
 |---------|-------------|
 | `dreamteam task-counter` | Show tasks_completed / total, next TRIGGER_* |
 
-**Triggers:** TRIGGER_RESEARCHER (20), TRIGGER_META_PLANNER (50), TRIGGER_AUDITOR (200)
+**Triggers:** TRIGGER_LEARNING (10), TRIGGER_RESEARCHER (20), TRIGGER_META_PLANNER (50), TRIGGER_AUDITOR (200)
 
 ## Memory (DB — Researcher/Auditor use only)
 
 | Command | Description |
 |---------|-------------|
-| `dreamteam memory-get <summaries\|architecture>` | Get memory content from DB |
+| `dreamteam memory-get <summaries\|architecture\|goal>` | Get memory content from DB |
 | `dreamteam memory-set <key> [file]` | Set memory in DB (stdin or file path) |
+| `dreamteam set-goal "goal text"` | Store original goal from /start (for FixPlanner alignment) |
 | `dreamteam memory-to-files` | Sync memory from DB to .dreamteam/memory/*.md |
 | `dreamteam recent-tasks [N]` | List last N done tasks from DB |
 | `dreamteam dag-state` | DAG state for Meta Planner (tasks, metrics from DB) |
@@ -59,6 +60,16 @@ Project root: 1) DREAMTEAM_PROJECT env 2) .dreamteam in cwd/parents 3) DreamTeam
 **MCP dreamteam-db** — Use tools dreamteam_get_task, dreamteam_get_memory, dreamteam_set_memory, dreamteam_get_dag_state, dreamteam_recent_tasks instead of Terminal when available.
 
 **Researcher, Meta Planner, Auditor** read/write memory via MCP or Terminal. Orchestrator runs `memory-to-files` after Researcher.
+
+## Learning Loop (DevExperience)
+
+| Command | Description |
+|---------|-------------|
+| `dreamteam init-dev-experience` | Initialize DevExperience DB (done by init-db) |
+| `dreamteam record-dev-experience <id> <approved\|critical> [attempts] [min]` | Record task experience (DevExperiencer) |
+| `dreamteam dev-experience-history [N]` | Get last N records (Learning Agent) |
+
+**Flow:** Reviewer → DevExperiencer (record) → Git-Ops. Every 10 tasks: Learning → FixPlanner. **On cyclic failure** (task blocked after 2 Critical): Learning runs immediately → FixPlanner.
 
 ## Resilience
 
@@ -68,13 +79,14 @@ Project root: 1) DREAMTEAM_PROJECT env 2) .dreamteam in cwd/parents 3) DreamTeam
 | `dreamteam recover --reset T001` | Reset specific task to todo |
 | `dreamteam check-memory` | Validate summaries.md, architecture.md line limits |
 
-## Vector Memory (100+ tasks, optional)
+## Vector Search (Qdrant, 100+ tasks, large knowledge base)
 
 | Command | Description |
 |---------|-------------|
-| `pip install dreamteam[vector]` | Install sentence-transformers, numpy |
-| `dreamteam vector-index` | Index codebase |
-| `dreamteam vector-search "<query>"` | Semantic search |
+| `pip install dreamteam[vector]` | Install Qdrant client, sentence-transformers, numpy |
+| `dreamteam vector-index` | Index codebase into Qdrant |
+| `dreamteam vector-search "<query>"` | Semantic search over indexed code |
+| `QDRANT_URL=http://localhost:6333` | Use Qdrant server (optional; default: local path) |
 
 ## Workflow Example
 
@@ -88,16 +100,17 @@ python -m dreamteam new-project .
 python -m dreamteam sync-tasks
 python -m dreamteam run-next
 
-# 4. Execute task (Composer + @developer), then Reviewer (code-reviewer)
+# 4. Execute task (Composer + @developer), then Reviewer (code-reviewer), then DevExperiencer (record)
 
-# 5. After Reviewer approval: Launch Git-Ops subagent (task ID + short title). Git-Ops does commit.
+# 5. After DevExperiencer (if approved): Launch Git-Ops subagent (task ID + short title). Git-Ops does commit.
 
-# 6. Then (update-task done auto-increments counter, emits TRIGGER_*):
+# 6. Then (update-task done auto-increments counter, emits TRIGGER_LEARNING/TRIGGER_RESEARCHER/etc.):
 python -m dreamteam update-task T001 done
 python -m dreamteam run-next
 
-# 7. If stuck: python -m dreamteam recover
+# 7. If TRIGGER_LEARNING: Learning agent -> may dispatch FixPlanner
 # 8. If TRIGGER_RESEARCHER: Researcher agent -> vector-index -> check-memory
+# 9. If stuck: python -m dreamteam recover
 ```
 
 ## Parallelism

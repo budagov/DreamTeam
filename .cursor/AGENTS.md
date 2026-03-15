@@ -8,7 +8,12 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 
 **When to dispatch subagents:**
 - **Planner** — New goal in chat, epic decomposition, task breakdown
-- **Planner-Sub** — Expand one epic into 15–25 subtasks (dispatch after Main Planner creates epic outline)
+- **Planner-Sub** — Expand one epic into 15–25 subtasks (dispatch after Planner creates epic outline)
+- **Left** — Sub-orchestrator, 33 tasks (Orchestrator dispatches via orchestrator-left)
+- **Right** — Sub-orchestrator, 33 tasks (Orchestrator dispatches via orchestrator-right)
+- **DevExperiencer** — Records production history after Reviewer (dev-experiencer)
+- **Learning** — Every 10 tasks, or on cyclic failure (task blocked after 2 Critical retries). Analyzes DevExperience, updates Developer, dispatches FixPlanner (learning)
+- **FixPlanner** — Corrects tasks based on Learning analysis (fix-planner)
 - **Developer** — Task from scheduler ready for implementation
 - **Reviewer** — After each task completion (spec compliance, then code quality)
 - **Git-Ops** — After Reviewer approval — git commit (ONLY Git-Ops does commits)
@@ -19,7 +24,7 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 - **Auditor** — When `task_counter.py` prints `TRIGGER_AUDITOR`
 
 **How to dispatch:**
-- Use `mcp_task` with `subagent_type`: `developer`, `code-reviewer`, `planner`, `researcher`, `meta-planner`, `auditor`, `git-ops`, `shell` (Terminal)
+- Use `mcp_task` with `subagent_type`: `developer`, `code-reviewer`, `planner`, `planner-sub`, `researcher`, `meta-planner`, `auditor`, `git-ops`, `shell` (Terminal), `orchestrator-left`, `orchestrator-right`, `dev-experiencer`, `learning`, `fix-planner`
 - Git-Ops is the ONLY agent that does commits. Developer, Reviewer use MCP dreamteam_get_task (or Terminal) for task content. Orchestrator uses Terminal for run-next, sync-tasks, update-task.
 - For Developer: include task ID, `.dreamteam/memory/architecture.md` snippet
 - For Reviewer: include changed files, task ID, architecture rules (Reviewer uses Terminal get-task for task content)
@@ -36,9 +41,9 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 
 | Role | Prompt File | When to Use |
 |------|-------------|-------------|
-| Main Orchestrator | `.cursor/agents/orchestrator-main.md` | Dispatches Sub-Orchestrators (33 tasks each), minimal context |
-| Sub-orchestrator (Left/Right) | `.cursor/agents/orchestrator-sub.md` | Re-checks DB on start, runs 33-task batch |
-| Orchestrator | `.cursor/agents/orchestrator.md` | Single-session flow (or when Sub loads it) |
+| Orchestrator | `.cursor/agents/orchestrator.md` | Dispatches Developer, Reviewer, Left, Right. One orchestrator. |
+| Left | `.cursor/agents/orchestrator-left.md` | Sub-orchestrator, 33 tasks per batch |
+| Right | `.cursor/agents/orchestrator-right.md` | Sub-orchestrator, 33 tasks per batch |
 | Planner | `.cursor/agents/planner.md` | New goal, epic, or task decomposition |
 | Planner-Sub | `.cursor/agents/planner-sub.md` | Expand one epic into 15–25 subtasks |
 | Developer | `.cursor/agents/developer.md` | Executing a task from scheduler |
@@ -48,6 +53,9 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 | Researcher | `.cursor/agents/researcher.md` | Every 20 tasks (TRIGGER_RESEARCHER) |
 | Meta Planner | `.cursor/agents/meta-planner.md` | Every 50 tasks (TRIGGER_META_PLANNER) |
 | Auditor | `.cursor/agents/auditor.md` | Every 200 tasks (TRIGGER_AUDITOR) |
+| DevExperiencer | `.cursor/agents/dev-experiencer.md` | After each Reviewer |
+| Learning | `.cursor/agents/learning.md` | Every 10 tasks (TRIGGER_LEARNING) |
+| FixPlanner | `.cursor/agents/fix-planner.md` | Dispatched by Learning |
 
 ## Skills
 

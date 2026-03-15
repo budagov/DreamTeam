@@ -16,14 +16,15 @@ def _get_memory_content(key: str) -> str | None:
     if os.path.exists(DB_PATH):
         import sqlite3
         conn = sqlite3.connect(DB_PATH, timeout=10.0)
-        cursor = conn.cursor()
         try:
+            cursor = conn.cursor()
             cursor.execute("SELECT content FROM memory WHERE key = ?", (key,))
             row = cursor.fetchone()
-            conn.close()
             if row and row[0]:
                 return row[0]
         except sqlite3.OperationalError:
+            pass
+        finally:
             conn.close()
     path = os.path.join(MEMORY_DIR, f"{key}.md")
     if os.path.exists(path):

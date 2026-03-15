@@ -18,12 +18,14 @@ def get_db_tasks():
         return {}
     import sqlite3
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    conn.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, title, status, priority, dependencies, owner FROM tasks")
-    rows = cursor.fetchall()
-    conn.close()
-    return {r["id"]: r for r in rows}
+    try:
+        conn.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, title, status, priority, dependencies, owner FROM tasks")
+        rows = cursor.fetchall()
+        return {r["id"]: r for r in rows}
+    finally:
+        conn.close()
 
 
 def get_file_tasks():

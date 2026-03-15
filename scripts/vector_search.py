@@ -1,49 +1,67 @@
 #!/usr/bin/env python3
-"""Semantic search over indexed codebase. Requires: pip install sentence-transformers numpy."""
+"""Semantic search over indexed codebase. Uses Qdrant (local or server).
+Requires: pip install dreamteam[vector] (sentence-transformers, numpy, qdrant-client)."""
 
-import os
 import sys
-import sqlite3
 
 import project
-DB_PATH = project.get_db_path()
 DEFAULT_TOP_K = 5
+COLLECTION_NAME = "dreamteam_code"
+
+
+def _get_qdrant_client():
+    """Create Qdrant client (server or local path)."""
+    try:
+        from qdrant_client import QdrantClient
+    except ImportError:
+        print("Install: pip install dreamteam[vector]", file=sys.stderr)
+        sys.exit(1)
+
+    url = project.get_qdrant_url()
+    if url:
+        return QdrantClient(url=url)
+    path = project.get_qdrant_path()
+    return QdrantClient(path=path)
 
 
 def search(query: str, top_k: int = DEFAULT_TOP_K) -> list[tuple[str, str, float]]:
     """Return list of (path, chunk, score) sorted by relevance."""
     try:
         from sentence_transformers import SentenceTransformer
-        import numpy as np
     except ImportError:
-        print("Install: pip install sentence-transformers numpy", file=sys.stderr)
-        sys.exit(1)
+        print("Install: pip install dreamteam[vector]", file=sys.stderr)
+        return []
 
-    if not os.path.exists(DB_PATH):
-        print("Database not found. Run: dreamteam init-db", file=sys.stderr)
-        sys.exit(1)
+    client = _get_qdrant_client()
 
-    conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
-    cursor.execute("SELECT path, chunk, embedding FROM vector_code")
-    rows = cursor.fetchall()
-    conn.close()
-
-    if not rows:
+    try:
+        info = client.get_collection(COLLECTION_NAME)
+    except Exception:
         print("No index. Run: dreamteam vector-index", file=sys.stderr)
         return []
 
+    if info.points_count == 0:
+        print("Index is empty. Run: dreamteam vector-index", file=sys.stderr)
+        return []
+
     model = SentenceTransformer("all-MiniLM-L6-v2")
-    query_emb = model.encode([query], convert_to_numpy=True).astype(np.float32)
+    query_emb = model.encode([query], convert_to_numpy=True).tolist()[0]
 
-    results = []
-    for path, chunk, emb_blob in rows:
-        emb = np.frombuffer(emb_blob, dtype=np.float32)
-        score = float(np.dot(query_emb[0], emb) / (np.linalg.norm(query_emb[0]) * np.linalg.norm(emb) + 1e-9))
-        results.append((path, chunk, score))
+    results = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_emb,
+        limit=top_k,
+        with_payload=True,
+    )
 
-    results.sort(key=lambda x: x[2], reverse=True)
-    return results[:top_k]
+    out = []
+    for pt in results.points:
+        payload = pt.payload or {}
+        path = payload.get("path", "")
+        chunk = payload.get("chunk", "")
+        score = float(pt.score if pt.score is not None else 0.0)
+        out.append((path, chunk, score))
+    return out
 
 
 def main() -> None:

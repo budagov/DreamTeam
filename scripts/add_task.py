@@ -23,6 +23,7 @@ def parse_task_file(content: str) -> dict | None:
         "priority": r"priority:\s*(\d+)",
         "dependencies": r"dependencies:\s*(.+)",
         "owner": r"owner:\s*(.+)",
+        "sort_order": r"sort_order:\s*(\d+)",
     }
     result = {}
     for key, pattern in patterns.items():
@@ -40,6 +41,8 @@ def parse_task_file(content: str) -> dict | None:
                     result[key] = "[]"
             elif key == "priority":
                 result[key] = int(val) if val.isdigit() else 1
+            elif key == "sort_order":
+                result[key] = int(val) if val.lstrip("-").isdigit() else 0
             else:
                 result[key] = val
     if "id" not in result:
@@ -49,6 +52,7 @@ def parse_task_file(content: str) -> dict | None:
     result.setdefault("priority", 1)
     result.setdefault("dependencies", "[]")
     result.setdefault("owner", "")
+    result.setdefault("sort_order", 0)
     return result
 
 
@@ -57,6 +61,13 @@ def _ensure_content_column(cursor: sqlite3.Cursor) -> None:
     cursor.execute("PRAGMA table_info(tasks)")
     if not any(col[1] == "content" for col in cursor.fetchall()):
         cursor.execute("ALTER TABLE tasks ADD COLUMN content TEXT")
+
+
+def _ensure_sort_order_column(cursor: sqlite3.Cursor) -> None:
+    """Add sort_order column if missing (migration)."""
+    cursor.execute("PRAGMA table_info(tasks)")
+    if not any(col[1] == "sort_order" for col in cursor.fetchall()):
+        cursor.execute("ALTER TABLE tasks ADD COLUMN sort_order INTEGER DEFAULT 0")
 
 
 def add_task_to_cursor(
@@ -70,11 +81,13 @@ def add_task_to_cursor(
         now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     content = task_data.get("content", "")
     _ensure_content_column(cursor)
+    _ensure_sort_order_column(cursor)
+    sort_order = task_data.get("sort_order", 0)
     if upsert:
         cursor.execute(
             """
-            INSERT INTO tasks (id, title, status, priority, dependencies, owner, content, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO tasks (id, title, status, priority, dependencies, owner, content, sort_order, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 title = excluded.title,
                 status = excluded.status,
@@ -82,6 +95,7 @@ def add_task_to_cursor(
                 dependencies = excluded.dependencies,
                 owner = excluded.owner,
                 content = excluded.content,
+                sort_order = excluded.sort_order,
                 updated_at = excluded.updated_at
             """,
             (
@@ -92,6 +106,7 @@ def add_task_to_cursor(
                 task_data["dependencies"],
                 task_data.get("owner", ""),
                 content,
+                sort_order,
                 now,
                 now,
             ),
@@ -99,8 +114,8 @@ def add_task_to_cursor(
     else:
         cursor.execute(
             """
-            INSERT OR IGNORE INTO tasks (id, title, status, priority, dependencies, owner, content, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR IGNORE INTO tasks (id, title, status, priority, dependencies, owner, content, sort_order, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 task_data["id"],
@@ -110,6 +125,7 @@ def add_task_to_cursor(
                 task_data["dependencies"],
                 task_data.get("owner", ""),
                 content,
+                sort_order,
                 now,
                 now,
             ),

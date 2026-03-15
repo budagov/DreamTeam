@@ -16,19 +16,19 @@ def get_task(task_id: str) -> str | None:
 
     import sqlite3
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
     try:
+        cursor = conn.cursor()
         cursor.execute("PRAGMA table_info(tasks)")
         if not any(col[1] == "content" for col in cursor.fetchall()):
-            conn.close()
             return _get_from_file(task_id)
 
         cursor.execute("SELECT content FROM tasks WHERE id = ?", (task_id,))
         row = cursor.fetchone()
-        conn.close()
         if row and row[0]:
             return row[0]
     except Exception:
+        pass
+    finally:
         conn.close()
     return _get_from_file(task_id)
 

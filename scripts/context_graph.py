@@ -18,14 +18,16 @@ def add_module(module: str, functions: str | list, dependencies: str | list) -> 
         dependencies = json.dumps(dependencies)
 
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM context_graph WHERE module = ?", (module,))
-    cursor.execute(
-        "INSERT INTO context_graph (module, functions, dependencies, embedding) VALUES (?, ?, ?, NULL)",
-        (module, functions, dependencies),
-    )
-    conn.commit()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM context_graph WHERE module = ?", (module,))
+        cursor.execute(
+            "INSERT INTO context_graph (module, functions, dependencies, embedding) VALUES (?, ?, ?, NULL)",
+            (module, functions, dependencies),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def list_modules() -> None:
@@ -35,10 +37,12 @@ def list_modules() -> None:
         return
 
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
-    cursor.execute("SELECT module, functions, dependencies FROM context_graph")
-    rows = cursor.fetchall()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT module, functions, dependencies FROM context_graph")
+        rows = cursor.fetchall()
+    finally:
+        conn.close()
 
     for module, functions, deps in rows:
         print(f"{module}: functions={functions}, deps={deps}")

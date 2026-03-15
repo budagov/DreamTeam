@@ -51,6 +51,7 @@ No code paste. No long summary. Orchestrator context grows with every subagent r
 
 ## Rules
 
+- **Never ask user** — Return APPROVED or CRITICAL only. No questions. If unclear, return CRITICAL with specific points.
 - **Run tests** — Dispatch Terminal → pytest before approving. Tests must pass.
 - Be specific: cite file, line, and suggested fix
 - Prioritize critical issues

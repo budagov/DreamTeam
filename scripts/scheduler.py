@@ -28,7 +28,7 @@ def parse_dependencies(deps_str: str | None) -> list[str]:
 
 def get_next_task() -> str | None:
     """Return next task ID ready for execution, or None.
-    Order: priority DESC, id ASC. First task with all deps in done_ids.
+    Order: sort_order ASC, priority DESC, id ASC. First task with all deps in done_ids.
     For fresh project: T001 (deps=[]) is always first."""
     if not os.path.exists(db.DB_PATH):
         print("Database not found. Run: dreamteam init-db", file=sys.stderr)
@@ -41,7 +41,7 @@ def get_next_task() -> str | None:
             SELECT id, title, status, priority, dependencies
             FROM tasks
             WHERE status = 'todo'
-            ORDER BY priority DESC, id ASC
+            ORDER BY sort_order ASC, priority DESC, id ASC
             """
         )
         rows = cursor.fetchall()
@@ -83,7 +83,7 @@ def list_ready() -> None:
             SELECT id, title, status, priority, dependencies
             FROM tasks
             WHERE status = 'todo'
-            ORDER BY priority DESC, id ASC
+            ORDER BY sort_order ASC, priority DESC, id ASC
             """
         )
         rows = cursor.fetchall()

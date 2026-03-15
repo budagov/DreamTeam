@@ -15,7 +15,7 @@ DB_PATH = project.get_db_path()
 
 
 def main() -> None:
-    """Sync all task files to database. Single transaction for 1000+ tasks."""
+    """Sync all task files to database. Tasks without files -> deprecated."""
     if not os.path.exists(TASKS_DIR):
         print("Tasks directory not found.", file=sys.stderr)
         sys.exit(1)
@@ -24,6 +24,7 @@ def main() -> None:
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
     cursor = conn.cursor()
     count = 0
+    file_ids = set()
     try:
         for name in sorted(os.listdir(TASKS_DIR)):
             if not name.endswith(".md"):
@@ -35,8 +36,25 @@ def main() -> None:
             if task_data:
                 task_data["content"] = content
                 add_task_to_cursor(cursor, task_data)
+                file_ids.add(task_data["id"])
                 count += 1
                 print(f"Synced {task_data['id']}")
+
+        cursor.execute("SELECT id FROM tasks")
+        db_ids = {r[0] for r in cursor.fetchall()}
+        orphan_ids = db_ids - file_ids
+        if orphan_ids:
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            for oid in orphan_ids:
+                cursor.execute(
+                    "UPDATE tasks SET status = 'deprecated', updated_at = ? WHERE id = ?",
+                    (now, oid),
+                )
+                print(f"Deprecated (no file): {oid}")
+            cursor.execute(
+                "UPDATE metrics SET value = (SELECT COUNT(*) FROM tasks WHERE status = 'done') WHERE metric = 'tasks_completed'"
+            )
         conn.commit()
     finally:
         conn.close()

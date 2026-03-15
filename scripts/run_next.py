@@ -72,26 +72,29 @@ def main() -> None:
     # 3. Quick integrity fix + ensure indexes (migration for existing DBs)
     try:
         import sqlite3
+        sys.path.insert(0, SCRIPTS_DIR)
+        import db_utils
         db_path = project.get_db_path()
         if os.path.exists(db_path):
             conn = sqlite3.connect(db_path, timeout=10.0)
-            cur = conn.cursor()
-            cur.execute(
-                "CREATE INDEX IF NOT EXISTS idx_tasks_status_priority_id ON tasks(status, priority DESC, id)"
-            )
-            cur.execute("CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)")
-            cur.execute("SELECT value FROM metrics WHERE metric = 'tasks_completed'")
-            m = cur.fetchone()
-            cur.execute("SELECT COUNT(*) FROM tasks WHERE status = 'done'")
-            actual = cur.fetchone()[0]
-            if m is not None and m[0] != actual:
+            try:
+                cur = conn.cursor()
                 cur.execute(
-                    "INSERT INTO metrics (metric, value) VALUES ('tasks_completed', ?) ON CONFLICT(metric) DO UPDATE SET value = excluded.value",
-                    (actual,),
+                    "CREATE INDEX IF NOT EXISTS idx_tasks_status_priority_id ON tasks(status, priority DESC, id)"
                 )
-                conn.commit()
-                print("Fixed tasks_completed drift.", file=sys.stderr)
-            conn.close()
+                cur.execute("CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)")
+                cur.execute("PRAGMA table_info(tasks)")
+                if not any(col[1] == "sort_order" for col in cur.fetchall()):
+                    cur.execute("ALTER TABLE tasks ADD COLUMN sort_order INTEGER DEFAULT 0")
+                cur.execute("SELECT value FROM metrics WHERE metric = 'tasks_completed'")
+                m = cur.fetchone()
+                cur.execute("SELECT COUNT(*) FROM tasks WHERE status = 'done'")
+                actual = cur.fetchone()[0]
+                if m is not None and m[0] != actual:
+                    if db_utils.fix_tasks_completed_metric():
+                        print("Fixed tasks_completed drift.", file=sys.stderr)
+            finally:
+                conn.close()
     except Exception:
         pass
 
@@ -107,10 +110,12 @@ def main() -> None:
             db_path = project.get_db_path()
             if os.path.exists(db_path):
                 conn = sqlite3.connect(db_path, timeout=10.0)
-                cur = conn.cursor()
-                cur.execute("SELECT COUNT(*) FROM tasks")
-                total = cur.fetchone()[0]
-                conn.close()
+                try:
+                    cur = conn.cursor()
+                    cur.execute("SELECT COUNT(*) FROM tasks")
+                    total = cur.fetchone()[0]
+                finally:
+                    conn.close()
         except Exception:
             pass
         print("All tasks complete.")
@@ -131,13 +136,15 @@ def main() -> None:
         db_path = project.get_db_path()
         if os.path.exists(db_path):
             conn = sqlite3.connect(db_path, timeout=10.0)
-            cur = conn.cursor()
-            cur.execute("SELECT value FROM metrics WHERE metric = 'tasks_completed'")
-            row = cur.fetchone()
-            completed = row[0] if row else 0
-            cur.execute("SELECT COUNT(*) FROM tasks")
-            total = cur.fetchone()[0]
-            conn.close()
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT value FROM metrics WHERE metric = 'tasks_completed'")
+                row = cur.fetchone()
+                completed = row[0] if row else 0
+                cur.execute("SELECT COUNT(*) FROM tasks")
+                total = cur.fetchone()[0]
+            finally:
+                conn.close()
     except Exception:
         pass
 
@@ -153,10 +160,11 @@ def main() -> None:
     print(f"   python -m dreamteam update-task {task_id} done")
     print("   python -m dreamteam run-next")
     print()
-    print("4. If update-task prints TRIGGER_RESEARCHER:")
+    print("4. If update-task prints TRIGGER_LEARNING (every 10): Learning -> FixPlanner")
+    print("5. If update-task prints TRIGGER_RESEARCHER:")
     print("   Researcher agent -> python -m dreamteam vector-index -> python -m dreamteam check-memory")
     print()
-    print("5. Left/Right auto-checkpoint every 33 tasks (no manual checkpoint needed)")
+    print("6. Left/Right auto-checkpoint every 33 tasks (no manual checkpoint needed)")
     print("=" * 60)
 
 

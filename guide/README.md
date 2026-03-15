@@ -9,6 +9,7 @@ Goal → Planner → Task DAG → Scheduler → Composer Agents → Testing → 
 ```
 
 **Triggers:**
+- Every 10 tasks → Learning (DevExperience analysis, may update Developer, dispatch FixPlanner)
 - Every 20 tasks → Researcher (context compression)
 - Every 50 tasks → Meta Planner (DAG optimization)
 - Every 200 tasks → Auditor (architecture audit)
@@ -56,7 +57,48 @@ your-project/
 
 ## 500+ Tasks: Main Orchestrator + Left/Right
 
-For large projects, use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 33. Planning: Sub-Planner per epic until 33 tasks. Execution: Developer → Reviewer → Git-Ops loop. Alternate Left ↔ Right until ALL_COMPLETE.
+For large projects, use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 33. Planning: Sub-Planner per epic until 33 tasks. Execution: Developer → Reviewer → DevExperiencer → Git-Ops loop. Alternate Left ↔ Right until ALL_COMPLETE.
+
+## Under the Hood: What the Autonomous Agent Has Inside
+
+The system is built for **self-sustaining execution** over 500–1000+ tasks. Three core mechanisms keep quality stable and prevent drift:
+
+### 1. Learning Loop (DevExperience)
+
+- **DevExperiencer** — After each Reviewer, records task outcome (approved/critical), attempts, time, technologies, approaches.
+- **Learning Agent** — Every 10 tasks, or **on cyclic failure** (task blocked after 2 Critical retries). Analyzes DevExperience, updates Developer, dispatches FixPlanner.
+- **FixPlanner** — Dispatched by Learning. Corrects upcoming tasks based on analysis (e.g. library change, approach adjustment).
+- **Developer updates** — Learning may edit `.cursor/agents/developer.md` when a clear pattern suggests instruction changes.
+
+**Effect:** The pipeline adapts to real production data instead of degrading over time.
+
+### 2. RAG (Retrieval-Augmented Context)
+
+- **Memory in DB** — `summaries`, `architecture`, `goal` live in SQLite. Researcher writes via `memory-set`; Orchestrator syncs to files with `memory-to-files`. **Goal** — stored at /start via `set-goal`; FixPlanner verifies plan changes against it.
+- **Vector search (Qdrant)** — `pip install dreamteam[vector]` enables `vector-index` and `vector-search`. Uses Qdrant: local storage (`.dreamteam/db/qdrant/`) by default, or `QDRANT_URL` for server. Used by Researcher for 100+ task projects and large knowledge bases.
+- **Compression** — Researcher replaces, not appends. Keeps context bounded (~150 lines summaries) so context never explodes.
+
+**Effect:** Agents get relevant context without token overflow across hundreds of tasks.
+
+### 3. Self-Maintenance Chain (Triggers)
+
+| Every N tasks | Agent       | Action                                      |
+|---------------|-------------|---------------------------------------------|
+| 10            | Learning    | Analyze DevExperience → FixPlanner, Developer |
+| 20            | Researcher  | Compress summaries, update architecture     |
+| 50            | Meta Planner| Optimize DAG, resplit tasks, tech debt       |
+| 200           | Auditor     | Architecture audit, duplicates, dependencies|
+
+**Trigger flow:** `update-task <id> done` increments `tasks_completed` and prints `TRIGGER_*` when count is divisible. Orchestrator dispatches the corresponding agent. No manual checkpoint.
+
+**Effect:** Context stays compressed, DAG stays optimized, architecture stays coherent. The chain never breaks; Orchestrator always knows the next step.
+
+### Flow Continuity (Nothing Drops)
+
+- **run-next** — Auto-runs `sync-tasks` if verify fails; fixes `tasks_completed` drift; always returns next task or "All tasks complete".
+- **update-task done** — Increments counter, prints `TRIGGER_*` when divisible. Orchestrator reacts immediately.
+- **recover** — Syncs tasks, fixes drift, resets stuck (>60 min in_progress), verifies integrity. Use after crash or mismatch.
+- **Strict sequence** — Developer → Reviewer → DevExperiencer → Git-Ops → update-task → run-next. No parallel agents; one command at a time.
 
 ## Development
 
@@ -73,4 +115,4 @@ PolyForm Noncommercial 1.0.0 (Government Use Prohibited) — personal, education
 
 - Python 3.10+
 - **Core:** stdlib only (scheduler, task_counter, etc.)
-- **Optional (100+ tasks):** `pip install dreamteam[vector]` for vector memory / semantic search
+- **Vector search (100+ tasks, large knowledge base):** `pip install dreamteam[vector]` — Qdrant (local or server), sentence-transformers, semantic search

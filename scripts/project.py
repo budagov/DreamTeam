@@ -43,6 +43,21 @@ def get_db_path() -> str:
     return os.path.join(get_data_root(), "db", "dag.db")
 
 
+def get_dev_experience_db_path() -> str:
+    """DevExperience DB: production history (reviewer results, time, attempts, tech)."""
+    return os.path.join(get_data_root(), "db", "dev_experience.db")
+
+
+def get_qdrant_path() -> str:
+    """Qdrant local storage path (when not using server)."""
+    return os.path.join(get_data_root(), "db", "qdrant")
+
+
+def get_qdrant_url() -> str | None:
+    """Qdrant server URL from env (e.g. http://localhost:6333). If set, use server instead of local path."""
+    return os.environ.get("QDRANT_URL")
+
+
 def get_tasks_dir() -> str:
     return os.path.join(get_data_root(), "tasks")
 

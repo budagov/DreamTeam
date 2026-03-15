@@ -16,17 +16,18 @@ def get_dag_state() -> dict:
         return {}
 
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, title, status, priority, dependencies, owner FROM tasks ORDER BY id"
-    )
-    tasks = [dict(row) for row in cursor.fetchall()]
-    cursor.execute("SELECT metric, value FROM metrics")
-    metrics = {row[0]: row[1] for row in cursor.fetchall()}
-    conn.close()
-
-    return {"tasks": tasks, "metrics": metrics}
+    try:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, title, status, priority, dependencies, owner FROM tasks ORDER BY id"
+        )
+        tasks = [dict(row) for row in cursor.fetchall()]
+        cursor.execute("SELECT metric, value FROM metrics")
+        metrics = {row[0]: row[1] for row in cursor.fetchall()}
+        return {"tasks": tasks, "metrics": metrics}
+    finally:
+        conn.close()
 
 
 def main() -> None:

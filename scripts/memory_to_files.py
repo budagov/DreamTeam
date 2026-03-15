@@ -17,15 +17,15 @@ def main() -> None:
 
     import sqlite3
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
     try:
+        cursor = conn.cursor()
         cursor.execute("SELECT key, content FROM memory")
         rows = cursor.fetchall()
     except sqlite3.OperationalError:
-        conn.close()
         print("Memory table not found. Run memory-set first.", file=sys.stderr)
         sys.exit(1)
-    conn.close()
+    finally:
+        conn.close()
 
     os.makedirs(MEMORY_DIR, exist_ok=True)
     count = 0

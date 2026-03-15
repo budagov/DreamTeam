@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-"""Index codebase for semantic search. Requires: pip install sentence-transformers numpy."""
+"""Index codebase for semantic search. Uses Qdrant (local or server).
+Requires: pip install dreamteam[vector] (sentence-transformers, numpy, qdrant-client)."""
 
 import os
 import sys
-import sqlite3
-from pathlib import Path
+import uuid
 
 import project
-DB_PATH = project.get_db_path()
 PROJECT_ROOT = project.get_project_root()
 EXCLUDE_DIRS = {"__pycache__", ".git", "node_modules", "venv", ".venv", "db"}
 EXCLUDE_EXT = {".pyc", ".db", ".sqlite", ".png", ".jpg", ".ico"}
 MAX_CHUNK_SIZE = 500
 MIN_CHUNK_SIZE = 50
+COLLECTION_NAME = "dreamteam_code"
+VECTOR_SIZE = 384  # all-MiniLM-L6-v2
 
 
 def get_code_files() -> list[tuple[str, str]]:
@@ -62,29 +63,47 @@ def chunk_content(path: str, content: str) -> list[tuple[str, str]]:
     return chunks
 
 
+def _get_qdrant_client():
+    """Create Qdrant client (server or local path)."""
+    try:
+        from qdrant_client import QdrantClient
+        from qdrant_client.models import Distance, VectorParams
+    except ImportError:
+        print("Install: pip install dreamteam[vector]", file=sys.stderr)
+        sys.exit(1)
+
+    url = project.get_qdrant_url()
+    if url:
+        return QdrantClient(url=url)
+    path = project.get_qdrant_path()
+    os.makedirs(path, exist_ok=True)
+    return QdrantClient(path=path)
+
+
+def _ensure_collection(client) -> None:
+    """Create collection if not exists."""
+    from qdrant_client.models import Distance, VectorParams
+
+    collections = client.get_collections().collections
+    names = [c.name for c in collections]
+    if COLLECTION_NAME not in names:
+        client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
+        )
+        print(f"Created collection '{COLLECTION_NAME}'.")
+
+
 def index_codebase() -> None:
-    """Index all code files and store embeddings in vector_code."""
+    """Index all code files and store embeddings in Qdrant."""
     try:
         from sentence_transformers import SentenceTransformer
-        import numpy as np
+        from qdrant_client.models import PointStruct
     except ImportError:
-        print("Install: pip install sentence-transformers numpy", file=sys.stderr)
+        print("Install: pip install dreamteam[vector]", file=sys.stderr)
         sys.exit(1)
 
-    if not os.path.exists(DB_PATH):
-        print("Database not found. Run: dreamteam init-db", file=sys.stderr)
-        sys.exit(1)
-
-    # Ensure vector_code table exists (init_db may have been run before it was added)
-    conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS vector_code (
-            path TEXT, chunk TEXT, embedding BLOB,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    conn.close()
+    client = _get_qdrant_client()
 
     model = SentenceTransformer("all-MiniLM-L6-v2")
     chunks: list[tuple[str, str]] = []
@@ -101,17 +120,29 @@ def index_codebase() -> None:
     paths = [c[0] for c in chunks]
     embeddings = model.encode(texts)
 
-    conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM vector_code")
-    for (path, chunk), emb in zip(zip(paths, texts), embeddings):
-        cursor.execute(
-            "INSERT INTO vector_code (path, chunk, embedding) VALUES (?, ?, ?)",
-            (path, chunk[:10000], emb.astype(np.float32).tobytes()),
+    # Delete and recreate for full reindex
+    try:
+        client.delete_collection(COLLECTION_NAME)
+    except Exception:
+        pass
+    _ensure_collection(client)
+
+    points = [
+        PointStruct(
+            id=str(uuid.uuid4()),
+            vector=emb.tolist(),
+            payload={"path": path, "chunk": chunk[:10000]},
         )
-    conn.commit()
-    conn.close()
-    print(f"Indexed {len(chunks)} chunks from {len(set(paths))} files.")
+        for (path, chunk), emb in zip(zip(paths, texts), embeddings)
+    ]
+
+    # Upload in batches (Qdrant recommends ~100-200 per batch)
+    batch_size = 100
+    for i in range(0, len(points), batch_size):
+        batch = points[i : i + batch_size]
+        client.upsert(collection_name=COLLECTION_NAME, points=batch)
+
+    print(f"Indexed {len(chunks)} chunks from {len(set(paths))} files into Qdrant.")
 
 
 if __name__ == "__main__":

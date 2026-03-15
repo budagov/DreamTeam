@@ -31,7 +31,7 @@ def test_get_next_task_empty_db(monkeypatch, tmp_path):
 
     conn = sqlite3.connect(db_path, timeout=10.0)
     conn.executescript("""
-        CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER, dependencies TEXT, owner TEXT, created_at DATETIME, updated_at DATETIME);
+        CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER, dependencies TEXT, owner TEXT, sort_order INTEGER DEFAULT 0, created_at DATETIME, updated_at DATETIME);
         CREATE TABLE metrics (metric TEXT PRIMARY KEY, value INTEGER);
         INSERT INTO metrics VALUES ('tasks_completed', 0);
     """)
@@ -49,7 +49,7 @@ def test_get_next_task_returns_ready(monkeypatch, tmp_path):
 
     conn = sqlite3.connect(db_path, timeout=10.0)
     conn.executescript("""
-        CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER, dependencies TEXT, owner TEXT, created_at DATETIME, updated_at DATETIME);
+        CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER, dependencies TEXT, owner TEXT, sort_order INTEGER DEFAULT 0, created_at DATETIME, updated_at DATETIME);
         CREATE TABLE metrics (metric TEXT PRIMARY KEY, value INTEGER);
         INSERT INTO metrics VALUES ('tasks_completed', 0);
         INSERT INTO tasks (id, title, status, priority, dependencies) VALUES ('T001', 'first', 'todo', 1, '[]');
@@ -69,7 +69,7 @@ def test_get_next_task_waits_for_deps(monkeypatch, tmp_path):
 
     conn = sqlite3.connect(db_path, timeout=10.0)
     conn.executescript("""
-        CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER, dependencies TEXT, owner TEXT, created_at DATETIME, updated_at DATETIME);
+        CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT, status TEXT, priority INTEGER, dependencies TEXT, owner TEXT, sort_order INTEGER DEFAULT 0, created_at DATETIME, updated_at DATETIME);
         CREATE TABLE metrics (metric TEXT PRIMARY KEY, value INTEGER);
         INSERT INTO metrics VALUES ('tasks_completed', 0);
         INSERT INTO tasks (id, title, status, priority, dependencies) VALUES ('T001', 'first', 'done', 1, '[]');

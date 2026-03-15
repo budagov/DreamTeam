@@ -30,7 +30,7 @@ The Autonomous Development System enables **500–1000+ sequential tasks** witho
    python -m dreamteam update-task <id> done
    python -m dreamteam run-next
    ```
-   Triggers: Researcher (20), Meta Planner (50), Auditor (200).
+   Triggers: Learning (10), Researcher (20), Meta Planner (50), Auditor (200).
 
 ---
 
@@ -42,7 +42,10 @@ The Autonomous Development System enables **500–1000+ sequential tasks** witho
 | **Planner-Sub** | After epic outline | Expand one epic into 15–25 subtasks |
 | **Developer** | Scheduler assigns | Write code, run tests, fix errors, update task status |
 | **Reviewer** | After each task | Review code quality, suggest fixes |
-| **Git-Ops** | After Reviewer approval | Add, commit, push (ONLY agent that commits) |
+| **DevExperiencer** | After each Reviewer | Record task experience to DevExperience DB (for Learning loop) |
+| **Git-Ops** | After DevExperiencer (if approved) | Add, commit, push (ONLY agent that commits) |
+| **Learning** | Every 10 tasks | Analyze DevExperience, may update Developer, dispatch FixPlanner |
+| **FixPlanner** | Dispatched by Learning | Correct tasks based on Learning analysis |
 | **Researcher** | Every 20 tasks | Summarize, update architecture, compress context |
 | **Meta Planner** | Every 50 tasks | Analyze tech debt, optimize DAG, resplit tasks |
 | **Auditor** | Every 200 tasks | Check architecture, find duplicates, analyze dependencies |

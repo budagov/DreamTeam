@@ -19,22 +19,23 @@ def get_last_completed_tasks(n: int = DEFAULT_LAST_N) -> list[dict]:
         return []
 
     conn = sqlite3.connect(DB_PATH, timeout=10.0)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT id, title, status, priority, dependencies, owner, updated_at
-        FROM tasks
-        WHERE status = 'done'
-        ORDER BY updated_at DESC
-        LIMIT ?
-        """,
-        (n,),
-    )
-    rows = cursor.fetchall()
-    conn.close()
-
-    return [dict(row) for row in rows]
+    try:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, title, status, priority, dependencies, owner, updated_at
+            FROM tasks
+            WHERE status = 'done'
+            ORDER BY updated_at DESC
+            LIMIT ?
+            """,
+            (n,),
+        )
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
 
 
 def get_task_file_content(task_id: str) -> str | None:
