@@ -117,4 +117,4 @@ python -m dreamteam run-next
 
 **Default: sequential.** One task, one subagent at a time. No parallel terminals.
 
-For 500+ tasks: use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 33.
+For large projects (thousands of tasks): use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 33 (batch = context switch, not project limit).

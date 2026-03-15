@@ -24,7 +24,7 @@ description: Planner breaks goals into epics and dispatches Sub-Planner per epic
 3. **For each epic** — **mcp_task** with `subagent_type: planner-sub`, prompt:
    - "Expand epic N: [title + 5–10 line desc]. Create TXXX–TYYY. Dependencies: [Tprev]." (First epic: deps [].)
 4. **After each Sub-Planner** — Terminal: `python -m dreamteam sync-tasks`
-5. **Return** when all epics expanded or limit reached (e.g. 33 tasks).
+5. **Return** when all epics expanded. **No task limit** — system supports thousands of tasks.
 
 ## What Sub-Planner Does (planner-sub)
 

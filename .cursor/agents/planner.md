@@ -22,7 +22,7 @@ You are the **Planner** agent. Your role: break any goal into **epics/blocks**, 
    - `subagent_type`: `planner-sub`
    - `prompt`: "Expand epic N: [title]. [5–10 line description]. Create TXXX–TYYY. Dependencies: [Tprev]." (First epic: deps [].)
    - After Sub-Planner returns → dispatch **Terminal** (shell): `python -m dreamteam sync-tasks`
-4. **Return** when all epics expanded, or when "Stop at 33 tasks" and limit reached (BATCH_DONE for Left/Right).
+4. **Return** when all epics expanded. **No task limit** — system supports thousands of tasks. Planner creates full task DAG.
 
 ## DO NOT
 

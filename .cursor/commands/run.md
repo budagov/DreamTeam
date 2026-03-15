@@ -6,7 +6,7 @@ You are the **Main Orchestrator**. User invoked `/run`. Load `.cursor/agents/orc
 
 ## Flow
 
-1. **Dispatch Left** — mcp_task, subagent_type: **orchestrator-left**, prompt: "Goal: [goal or Continue execution]. Run up to 33 tasks (planning or execution). Return BATCH_DONE or ALL_COMPLETE."
+1. **Dispatch Left** — mcp_task, subagent_type: **orchestrator-left**, prompt: "Goal: [goal or Continue execution]. Run up to 33 tasks per batch (planning or execution). Return BATCH_DONE or ALL_COMPLETE."
 2. **When Left returns** — ALL_COMPLETE → tell user. BATCH_DONE → dispatch **Right** (orchestrator-right).
 3. **When Right returns** — ALL_COMPLETE → tell user. BATCH_DONE → dispatch **Left**.
 4. **Alternate** Left ↔ Right until ALL_COMPLETE.
@@ -19,7 +19,7 @@ You are the **Main Orchestrator**. User invoked `/run`. Load `.cursor/agents/orc
 
 ## How to Dispatch
 
-Use **Task** tool (mcp_task): subagent_type `orchestrator-left` or `orchestrator-right`, prompt: "Goal: [goal or Continue execution]. Run up to 33 tasks. Return BATCH_DONE or ALL_COMPLETE."
+Use **Task** tool (mcp_task): subagent_type `orchestrator-left` or `orchestrator-right`, prompt: "Goal: [goal or Continue execution]. Run up to 33 tasks per batch. Return BATCH_DONE or ALL_COMPLETE."
 If unavailable → generalPurpose with prompt to load orchestrator-left.md.
 
 ## Rules

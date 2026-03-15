@@ -164,7 +164,7 @@ def main() -> None:
     print("5. If update-task prints TRIGGER_RESEARCHER:")
     print("   Researcher agent -> python -m dreamteam vector-index -> python -m dreamteam check-memory")
     print()
-    print("6. Left/Right auto-checkpoint every 33 tasks (no manual checkpoint needed)")
+    print("6. Left/Right auto-checkpoint every 33 tasks per batch (context switch; project can have thousands of tasks)")
     print("=" * 60)
 
 

@@ -11,8 +11,8 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 **Left/Right** dispatch: Planner, Developer, Reviewer, DevExperiencer, Git-Ops, Learning, FixPlanner, Researcher, Meta Planner, Auditor, Terminal.
 
 **When to dispatch:**
-- **Left** — Main Orchestrator dispatches (orchestrator-left). Left runs 33 tasks (planning or execution).
-- **Right** — Main Orchestrator dispatches (orchestrator-right). Right runs 33 tasks.
+- **Left** — Main Orchestrator dispatches (orchestrator-left). Left runs up to 33 tasks per batch (planning or execution). Project can have thousands of tasks.
+- **Right** — Main Orchestrator dispatches (orchestrator-right). Right runs up to 33 tasks per batch.
 - **Planner** — Left/Right dispatch (planner). Planner breaks into epics, dispatches Sub-Planner.
 - **Planner-Sub** — Planner dispatches (planner-sub), not Orchestrator
 - **DevExperiencer** — Left/Right dispatch after Reviewer (dev-experiencer)
@@ -42,8 +42,8 @@ This project uses the Autonomous Development System. Roles can be executed **as 
 | Role | Prompt File | When to Use |
 |------|-------------|-------------|
 | Orchestrator | `.cursor/agents/orchestrator.md` | ONLY dispatches Left/Right. Left/Right do all subagent orchestration. |
-| Left | `.cursor/agents/orchestrator-left.md` | Sub-orchestrator, 33 tasks per batch |
-| Right | `.cursor/agents/orchestrator-right.md` | Sub-orchestrator, 33 tasks per batch |
+| Left | `.cursor/agents/orchestrator-left.md` | Sub-orchestrator, up to 33 tasks per batch (context switch; project can have thousands) |
+| Right | `.cursor/agents/orchestrator-right.md` | Sub-orchestrator, up to 33 tasks per batch |
 | Planner | `.cursor/agents/planner.md` | New goal, epic, or task decomposition |
 | Planner-Sub | `.cursor/agents/planner-sub.md` | Expand one epic into 15–25 subtasks |
 | Developer | `.cursor/agents/developer.md` | Executing a task from scheduler |

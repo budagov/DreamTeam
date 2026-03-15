@@ -20,7 +20,7 @@ You are **Left**. Flow: save goal → launch **Planner** (planning) → when pla
 
 ## Phase 1: Planning (0 tasks)
 
-1. **Dispatch Planner** — mcp_task, subagent_type: **planner** (NOT planner-sub), prompt: "Goal: [goal]. Break into epics. For each epic call mcp_task planner-sub. Stop at 33 tasks. Return BATCH_DONE."
+1. **Dispatch Planner** — mcp_task, subagent_type: **planner** (NOT planner-sub), prompt: "Goal: [goal]. Break into epics. For each epic call mcp_task planner-sub. Expand ALL epics — no task limit. System supports thousands of tasks."
 2. **Wait for Planner.** Do NOT create tasks or call Sub-Planner — Planner does that.
 3. **When Planner returns** → Terminal → `python -m dreamteam sync-tasks`
 4. **Return BATCH_DONE immediately.** Main switches to Right for execution.
@@ -38,7 +38,7 @@ You are **Left**. Flow: save goal → launch **Planner** (planning) → when pla
 5. **TRIGGER_BATCH_SWITCH** (update-task prints every 15 tasks) → Return **BATCH_DONE** immediately. Main switches to Right.
 6. **TRIGGER_LEARNING** (every 10) → Learning → FixPlanner. **TRIGGER_*** → Researcher/Meta Planner/Auditor; memory-to-files
 7. **Critical** → Developer fix max 2. After 2 retries → Learning, then blocked
-8. **Repeat** until **33 tasks** done OR TRIGGER_BATCH_SWITCH → Return **BATCH_DONE**
+8. **Repeat** until **BATCH_SIZE (33) tasks done in this run** OR TRIGGER_BATCH_SWITCH → Return **BATCH_DONE** (batch size = context switch, not project limit; project can have thousands of tasks)
 9. **Context pressure** (>80 files) → Return **BATCH_DONE** early
 
 ## Return Format (CRITICAL)

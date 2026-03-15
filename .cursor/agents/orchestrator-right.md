@@ -34,7 +34,7 @@ You are **Right**. Your job: **EXECUTION only**. You run Developer, Reviewer, De
 5. **TRIGGER_BATCH_SWITCH** (update-task prints every 15 tasks) → Return **BATCH_DONE** immediately
 6. **TRIGGER_LEARNING** (every 10) → Learning → FixPlanner. **TRIGGER_*** → Researcher/Meta Planner/Auditor; memory-to-files
 7. **Critical** → Developer fix max 2. After 2 retries → Learning, then blocked
-8. **Repeat** until **33 tasks** done OR TRIGGER_BATCH_SWITCH → Return **BATCH_DONE**
+8. **Repeat** until **BATCH_SIZE (33) tasks done in this run** OR TRIGGER_BATCH_SWITCH → Return **BATCH_DONE** (batch size = context switch, not project limit; project can have thousands of tasks)
 9. **Context pressure** (>80 files) → Return **BATCH_DONE** early
 
 ## Return Format (CRITICAL)

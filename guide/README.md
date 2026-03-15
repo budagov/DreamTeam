@@ -57,7 +57,7 @@ your-project/
 
 ## 500+ Tasks: Main Orchestrator + Left/Right
 
-For large projects, use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 33. Planning: Left/Right dispatch Planner; Planner breaks into epics and dispatches Sub-Planner per epic. Execution: Developer → Reviewer → DevExperiencer → Git-Ops loop. Alternate Left ↔ Right until ALL_COMPLETE.
+For large projects (thousands of tasks), use `/run` — Main Orchestrator dispatches Left/Right Sub-orchestrators in batches of 33 (batch = context switch). Planning: Left/Right dispatch Planner; Planner expands ALL epics via Sub-Planner (no task limit). Execution: Developer → Reviewer → DevExperiencer → Git-Ops loop. Alternate Left ↔ Right until ALL_COMPLETE.
 
 ## Under the Hood: What the Autonomous Agent Has Inside
 
