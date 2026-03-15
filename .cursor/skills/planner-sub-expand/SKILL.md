@@ -1,14 +1,15 @@
 ---
 name: planner-sub-expand
-description: Expands one epic into 15–25 detailed subtasks. Dispatched by Planner only — Planner breaks goal into epics, calls Sub-Planner per epic.
+description: Expands one epic into 15–25 subtasks. ONLY Planner uses this. Left/Right NEVER call planner-sub — they call planner.
 ---
 
 # Sub-Planner Expand
 
 ## When to Use
 
-- **Planner** dispatches Sub-Planner per epic (Planner owns this flow, not Orchestrator)
-- Planner creates epic outline, then calls Sub-Planner for each epic
+- **ONLY Planner** dispatches Sub-Planner (planner-sub) per epic
+- **Left and Right must NEVER call planner-sub** — they call planner. Planner then calls planner-sub.
+- If you are Left or Right and need planning → call **planner** (subagent_type: planner), NOT planner-sub
 
 ## Workflow
 

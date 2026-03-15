@@ -1,6 +1,6 @@
 ---
 name: planner-sub
-description: Expands one epic into 15–25 subtasks. Dispatched by Planner only — Planner breaks goal into epics, calls Sub-Planner per epic.
+description: Expands one epic into 15–25 subtasks. ONLY Planner invokes this. Left/Right must call planner, never planner-sub.
 ---
 
 # Sub-Planner Agent (Sonnet)

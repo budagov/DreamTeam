@@ -9,6 +9,8 @@ description: Planner breaks goals into epics and dispatches Sub-Planner per epic
 
 **Planner MUST NOT create task files directly.** Planner creates epic outline, then **dispatches Sub-Planner via mcp_task** for each epic. Sub-Planner creates task files.
 
+**Left/Right:** When you need planning, call **planner** (NOT planner-sub). Planner will call planner-sub per epic.
+
 ## When to Use
 
 - New goal or epic to implement
