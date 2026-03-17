@@ -27,15 +27,29 @@ graph TD
         Main <--> |Switch Batch / Context Switch| LR{Left / Right Sub-Agents}
     end
 
-    subgraph "Context-Safe Operations (Managed by Sub-Agents)"
-        LR --> Planning[Planning Phase: Planner -> Sub-Planner]
-        LR --> Execution[Execution Loop: Dev -> Rev -> Git]
-        LR --> Maintenance[Self-Maintenance: Learning -> Auditor]
+    subgraph "Operations (Managed by Sub-Agents)"
+        LR --> WorkerP[Planner / Sub-Planner]
+        LR --> Loop[Execution Loop]
+        
+        subgraph "Execution Loop"
+            Loop --> Dev[Developer] --> Rev[Reviewer]
+            Rev --> Exp[DevExperiencer] --> Git[Git-Ops]
+            Git --> Done[update-task Done]
+            Done -->|Continue Batch| Loop
+        end
+        
+        subgraph "Self-Maintenance Chain"
+            Done -->|TRIGGER_*| Maintenance[Learning / Researcher / Meta / Auditor]
+            Maintenance --> Learn[Learning Agent] --> Fix[FixPlanner]
+        end
+
+        %% Tool Usage
+        Dev & Rev & WorkerP & Maintenance -.-> Term[[Terminal Subagent]]
     end
     
-    Planning --> DAG[(Task DAG)]
-    Execution --> DAG
-    Maintenance -.->|Refine| DAG
+    WorkerP --> DAG[(Task DAG)]
+    Fix -.->|Fixes & Reorders| DAG
+    Maintenance -.->|Optimize & Compress| DAG & Memory[(Memory DB)]
 ```
 
 ---
