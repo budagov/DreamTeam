@@ -1,86 +1,105 @@
-# DreamTeam — Autonomous Development System
+# DreamTeam — Autonomous Development Cruiser for Cursor
 
-An autonomous development engine for **500–1000+ sequential tasks** without quality degradation. Built for fault tolerance, continuous learning, and sliding task planning.
+[![License: PolyForm](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
+[![System: Cursor](https://img.shields.io/badge/Designed_for-Cursor-00AEEF.svg)](https://cursor.sh)
 
-**Quick Start:** `python -m dreamteam new-project .` (in empty folder) → Open in Cursor → `/start` + goal → `/run`
+A long-range **Autonomous Development Cruiser** capable of executing **500–1000+ sequential tasks** without quality degradation. Built for fault tolerance, continuous learning, and multi-layered agent orchestration.
 
-**Documentation:** [guide/](guide/) — README, INSTRUCTIONS, COMMANDS, INSTALL
+> [!IMPORTANT]
+> **Orchestration Zero:** DreamTeam is designed to offload work from the main chat. Run batches of 15+ tasks with minimal supervision.
+
+**Quick Start:**
+1. `python -m dreamteam new-project .` (in an empty folder)
+2. Open in Cursor → `/start` + your goal
+3. Start or resume the execution loop: `/run`
 
 ---
 
-## Under the Hood: How It Works
+## Pipeline: High-Performance Autonomy
+
+The system uses a recursive orchestration loop. The **Main Orchestrator** dispatches specialized sub-orchestrators to handle batches of tasks, keeping the main context clean and stable.
+
+```mermaid
+graph TD
+    Goal((Goal)) --> Planner(Planner Agent)
+    Planner --> DAG{Task DAG}
+    DAG --> Scheduler[Scheduler]
+    
+    subgraph "Execution Loop (L0 Orchestration)"
+        Scheduler --> Orchestrator{Left/Right Orchestrator}
+        Orchestrator --> Developer[Developer Agent]
+        Developer --> Reviewer[Reviewer Agent]
+        Reviewer --> DevExp[DevExperiencer]
+        DevExp --> GitOps[Git-Ops]
+        GitOps --> Update[update-task Done]
+    end
+    
+    Update --> Triggers{Self-Correction Triggers}
+    Triggers -->|Every 10| Learning[Learning Agent -> FixPlanner]
+    Triggers -->|Every 20| Researcher[Researcher -> Context Compression]
+    Triggers -->|Every 50| Meta[Meta Planner -> DAG Optimization]
+    
+    Learning -.-> DAG
+    Researcher -.-> Memory[(Memory DB)]
+    Meta -.-> DAG
+    
+    Update --> Next[run-next]
+    Next --> Scheduler
+```
+
+---
+
+## Under the Hood: Scalable Autonomy
+
+The system is built to minimize "Main Chat" context overflow. Using a **Dual Sub-Orchestrator system (Left/Right)**, DreamTeam offloads execution to sub-agents, leaving the main chat lean and responsive. This architectural split allows massive task sequences to run even on non-frontier models.
+
+### AI Sub-Agent Hierarchy — Multi-Layered Intelligence
+
+DreamTeam uses a structured hierarchy to maintain precision across long-duration projects:
+
+| Layer | Role | Primary Agents |
+|:---:|:---|:---|
+| **L0** | Orchestration | Main Orchestrator, Left/Right |
+| **L1** | Planning & Evolution | Planner, Meta Planner, FixPlanner |
+| **L2** | Core Execution | Developer, Reviewer, Researcher |
+| **L3** | System Ops | Git-Ops, DevExperiencer, Auditor |
+
+---
+
+## Core Mechanisms
 
 ### Fault Tolerance — Nothing Gets Lost
-
 The system is designed to recover from crashes, mismatches, and stuck tasks without manual intervention:
-
-| Mechanism | What it does |
-|-----------|--------------|
-| **run-next** | Before each task: verifies DB↔files, auto-runs sync if mismatch, fixes `tasks_completed` drift, resets stuck tasks (>60 min in_progress) |
-| **recover** | Full reset: sync tasks, fix metrics, reset stuck, verify integrity, check memory |
-| **Strict sequence** | One agent at a time, one terminal command at a time — no race conditions, no parallel conflicts |
-| **State in DB** | All state lives in SQLite (`.dreamteam/db/`). Session-agnostic: Orchestrator can resume after a break without losing context |
-
-**Effect:** If something breaks, `recover` + `run-next` brings the pipeline back. No manual checkpoint needed.
-
----
+*   **run-next**: Verifies DB↔Files consistency, auto-syncs if needed, and resets stuck tasks.
+*   **recover**: Full system reset, integrity verification, and memory health check.
+*   **State-in-DB**: All state lives in SQLite. The Cruiser can resume after a break without losing a single bit of context.
 
 ### Learnability — The Pipeline Adapts
+DreamTeam improves from production feedback instead of degrading:
+*   **DevExperiencer**: Records every outcome, attempt count, and time spent.
+*   **Learning Agent**: Analyzes the Experience DB to detect patterns of failure or high friction.
+*   **FixPlanner**: Automatically adjusts upcoming tasks (library choices, dependency updates) to avoid recurring roadblocks.
+*   **Developer Updates**: The system may augment `.cursor/agents/developer-addendum.md` with additional instructions to permanently adopt successful patterns.
 
-Instead of degrading over hundreds of tasks, the system improves from production feedback:
+### Analytics Dashboard — Monitor the Friction
+Launch a minimalistic web dashboard to track your Cruiser's performance:
+*   **KPIs**: Total tasks, estimated tokens, and **Friction Score** (Avg Attempts).
+*   **Visualization**: Identify hallucination spikes and time-heavy tasks.
+*   **Task Lineage**: Track original plans vs. tasks added during self-correction.
 
-| Component | Role |
-|-----------|------|
-| **DevExperiencer** | After each Reviewer: records outcome (approved/critical), attempts, time, technologies |
-| **Learning Agent** | Every 10 tasks (or on cyclic failure): analyzes DevExperience, updates Developer instructions, dispatches FixPlanner |
-| **FixPlanner** | Corrects upcoming tasks: library changes, approach adjustments, dependency updates — aligned with original goal |
-| **Developer updates** | Learning may edit `.cursor/agents/developer.md` when patterns suggest instruction changes |
-
-**Effect:** The pipeline adapts to real production data. Blocked tasks and critical feedback feed back into the plan and agent behavior.
-
----
-
-### Sliding Task Planning — The Plan Evolves
-
-The task queue is not fixed. FixPlanner owns it and can reorder, deprecate, or correct tasks as the project evolves:
-
-| Mechanism | Purpose |
-|-----------|---------|
-| **sort_order** | Explicit queue order. Lower = earlier. FixPlanner sets it when reordering. |
-| **deprecated** | Removed from plan, kept in DB for history. Delete task file → sync-tasks marks it deprecated. |
-| **FixPlanner** | Queue owner. Reorders (sort_order), deprecates (delete file), updates dependencies before deprecating. |
-| **Meta Planner** | Every 50 tasks: optimizes DAG, resplits oversized tasks, addresses tech debt. |
-
-**Effect:** The plan slides as new information arrives. Tasks can be reordered, replaced, or deprecated without breaking the pipeline. Goal stays fixed; implementation details adapt.
+> **Command:** `python -m dreamteam dashboard`
 
 ---
 
-### RAG & Context — No Token Overflow
-
-The Orchestrator runs in the main chat. Without control, context would explode over hundreds of tasks. The system solves this with **RAG + context minimization**:
-
-| Mechanism | Purpose |
-|-----------|---------|
-| **Memory in DB** | `summaries`, `architecture`, `goal` live in SQLite. Researcher writes via `memory-set`; Orchestrator syncs to files with `memory-to-files`. Subagents read from DB or files. |
-| **Vector search (Qdrant)** | `pip install dreamteam[vector]` — semantic search over codebase. Researcher uses it for 100+ task projects. Local storage or `QDRANT_URL` server. |
-| **Compression** | Researcher replaces, not appends. Summaries stay ~150 lines. Context never explodes. |
-| **Orchestrator: never read files** | Pass task ID only. "Execute task T001." Developer fetches content via MCP `dreamteam_get_task`. No architecture excerpts, no pasting. |
-| **State in .dreamteam/** | All context lives in DB and files. Session-agnostic: Orchestrator can resume after a break. Terminal output + task ID is enough. |
-
-**Effect:** Orchestrator stays lean. Subagents pull what they need. Over 1000 tasks, context stays bounded — no overflow.
-
----
-
-## Pipeline Overview
-
-```
-Goal → Planner → Task DAG → Scheduler → Developer → Reviewer → DevExperiencer → Git-Ops → update-task → run-next
-                                    ↓
-                    Triggers: Learning (10) | Researcher (20) | Meta Planner (50) | Auditor (200)
-```
+## Documentation
+- [guide/](guide/) — Full setup, commands, and best practices.
+- [INSTRUCTIONS.md](guide/INSTRUCTIONS.md) — System overview.
+- [COMMANDS.md](guide/COMMANDS.md) — CLI reference.
 
 ---
 
 ## License
+PolyForm Noncommercial 1.0.0 — personal, educational, and non-profit use only. See [LICENSE](LICENSE).
 
-PolyForm Noncommercial 1.0.0 — personal, educational, non-profit only. See [LICENSE](LICENSE).
+---
+<p align="center">Made with heart from BuLab</p>

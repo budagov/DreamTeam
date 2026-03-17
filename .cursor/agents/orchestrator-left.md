@@ -56,7 +56,7 @@ When you run Phase 2: run-next → if task ID → **immediately Dispatch Develop
 6. **After DevExperiencer returns** → Dispatch **Git-Ops** (mcp_task, subagent_type: **git-ops**, prompt: "Commit task [id]: [short title].")
 7. **After Git-Ops returns** → Terminal → `python -m dreamteam update-task [id] done`
 8. **Read update-task output** for TRIGGER_* — process in order (see Trigger Handling below).
-9. **Repeat** until BATCH_SIZE (33) OR TRIGGER_BATCH_SWITCH → Return **BATCH_DONE**
+9. **Repeat** until BATCH_SIZE (15) OR TRIGGER_BATCH_SWITCH → Return **BATCH_DONE**
 10. **Context pressure** (>80 files) → Return **BATCH_DONE** early
 
 ## Trigger Handling (from update-task done output only)

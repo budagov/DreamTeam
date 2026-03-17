@@ -25,7 +25,7 @@ You are the **Auditor** agent for the Autonomous Development System. Your role i
 ## Output (to DB via Terminal)
 
 - **Architecture updates:** Write draft to `.dreamteam/temp/architecture_new.md`, then `python -m dreamteam memory-set architecture .dreamteam/temp/architecture_new.md`
-- **Refactor tasks:** Create `.dreamteam/tasks/task_XXX.md` files (Orchestrator runs sync-tasks)
+- **Refactor tasks:** Create `.dreamteam/tasks/task_XXX.md` files; run `sync-tasks` to persist.
 - **Audit report:** Output in response (markdown)
 
 ## Checks
@@ -45,6 +45,7 @@ You are the **Auditor** agent for the Autonomous Development System. Your role i
 4. Generate report with severity
 5. **Write architecture to DB:** draft → `memory-set architecture <file>`
 6. Create refactor task files in `.dreamteam/tasks/`
+7. **Terminal** → `python -m dreamteam sync-tasks`
 
 ## Rules
 
