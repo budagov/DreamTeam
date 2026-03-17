@@ -20,56 +20,54 @@ A long-range **Autonomous Development Cruiser for Cursor** capable of executing 
 The system uses a recursive orchestration loop. The **Main Orchestrator** dispatches specialized sub-orchestrators to handle batches of tasks, keeping the main context clean and stable.
 
 ```mermaid
-graph TD
-    %% Node Definitions
-    classDef clsMain fill:#4f46e5,color:#fff,stroke:#3730a3,stroke-width:2px,rx:10,ry:10
-    classDef clsSub fill:#f8fafc,stroke:#64748b,stroke-width:2px,stroke-dasharray: 5 5,rx:10,ry:10
-    classDef clsWorker fill:#fff,stroke:#94a3b8,stroke-width:1px,rx:5,ry:5
-    classDef clsMaintenance fill:#ecfdf5,stroke:#10b981,stroke-width:1px,rx:5,ry:5
-    classDef clsStorage fill:#f1f5f9,stroke:#475569,stroke-width:2px,shape:cylinder
-    classDef clsTerminal fill:#0f172a,color:#fff,stroke:#1e293b,rx:2,ry:2
+graph LR
+    %% Node Styling
+    classDef main fill:#4f46e5,color:#fff,stroke:#3730a3,stroke-width:2px,rx:6
+    classDef sub fill:#f1f5f9,stroke:#64748b,stroke-width:2px,stroke-dasharray: 5,rx:6
+    classDef logic fill:#fff,stroke:#e2e8f0,stroke-width:1px,rx:4
+    classDef maintain fill:#f0fdf4,stroke:#16a34a,color:#166534,rx:4
+    classDef infra fill:#1e293b,color:#fff,stroke:#0f172a,rx:2
+    classDef data fill:#fff,stroke:#475569,stroke-width:2px,shape:cylinder
 
-    %% Flow
-    User([Goal]) --> Main
-    Main[Main Orchestrator]:::clsMain
-    
-    subgraph Cruiser ["Cruiser Control Layer"]
-        Main <--> |Context Switching| LR{Left / Right Sub-Agents}:::clsSub
+    %% Main Flow
+    Start([Goal]) --> Main[Main Orchestrator]:::main
+
+    subgraph Strategy ["Strategic Control"]
+        Main <--> Switch{Context Switching}:::sub
+        Switch --- Left[Left Sub-Agent]:::sub
+        Switch --- Right[Right Sub-Agent]:::sub
     end
 
-    subgraph Operations ["Active Mission Operations"]
-        LR --> Planning[Planning Phase]:::clsWorker
-        LR --> Execution[Execution Loop]:::clsWorker
+    Left & Right --> Ops
+
+    subgraph Ops ["Autonomous Operations"]
+        direction TB
         
-        subgraph PLogic ["Planner Workers"]
-            Planning --> P1[Planner]:::clsWorker
-            P1 --> P2[Sub-Planner]:::clsWorker
-        end
-        
-        subgraph ELogic ["Standard Loop"]
-            Execution --> Dev[Developer]:::clsWorker
-            Dev --> Rev[Reviewer]:::clsWorker
-            Rev --> Exp[DevExperiencer]:::clsWorker
-            Exp --> Git[Git-Ops]:::clsWorker
-            Git --> Done[update-task Done]:::clsWorker
-            Done -->|Continue Batch| Execution
-        end
-        
-        subgraph MLogic ["Self-Correction Chain"]
-            Done -->|TRIGGER_*| Maintenance[Maintenance Agents]:::clsMaintenance
-            Maintenance --> Learn[Learning Agent]:::clsMaintenance
-            Learn --> Fix[FixPlanner]:::clsMaintenance
+        subgraph Planning ["Mission Planning"]
+            P1[Planner]:::logic --> P2[Sub-Planner]:::logic
         end
 
-        %% Common Tools
-        ELogic & PLogic & MLogic -.-> Term[Terminal Subagent]:::clsTerminal
+        subgraph Execution ["Execution Loop"]
+            E1[Developer]:::logic --> E2[Reviewer]:::logic
+            E2 --> E3[DevExperience]:::logic
+            E3 --> E4[Git-Ops]:::logic
+            E4 --> E5[update-task]:::logic
+        end
+
+        subgraph Maintenance ["Maintenance & Learning"]
+            M1[Learning Agent]:::maintain --> M2[FixPlanner]:::maintain
+            M3[Researcher]:::maintain
+        end
     end
+
+    %% Infrastructure & Data
+    Ops -.- Term{{Terminal Subagent}}:::infra
     
-    %% Database Links
-    PLogic --> DAG[(Task DAG)]:::clsStorage
-    Fix -.->|Auto-Correction| DAG
-    MLogic -.->|Optimization| DAG
-    MLogic -.->|Refinement| Mem[(Memory DB)]:::clsStorage
+    P2 --> DAG[(Task DAG)]:::data
+    E5 -->|Trigger| M1
+    M2 -.->|Re-Plan| DAG
+    M3 -.->|Compress| MEM[(Memory DB)]:::data
+    E5 -.->|Next Task| E1
 ```
 
 ---
