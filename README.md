@@ -3,10 +3,10 @@
 [![License: PolyForm](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue.svg)](LICENSE)
 [![System: Cursor](https://img.shields.io/badge/Designed_for-Cursor-00AEEF.svg)](https://cursor.sh)
 
-A long-range **Autonomous Development Cruiser** capable of executing **500–1000+ sequential tasks** without quality degradation. Built for fault tolerance, continuous learning, and multi-layered agent orchestration.
+A long-range **Autonomous Development Cruiser for Cursor** capable of executing **500–1000+ sequential tasks** without quality degradation. Built for fault tolerance, continuous learning, and multi-layered agent orchestration.
 
 > [!IMPORTANT]
-> **Orchestration Zero:** DreamTeam is designed to offload work from the main chat. Run batches of 15+ tasks with minimal supervision.
+> **Orchestration Zero:** DreamTeam is designed to offload work from the main chat. It dispatches **Left and Right Sub-Orchestrators** to run batches of 15+ tasks with minimal supervision.
 
 **Quick Start:**
 1. `python -m dreamteam new-project .` (in an empty folder)
@@ -21,30 +21,21 @@ The system uses a recursive orchestration loop. The **Main Orchestrator** dispat
 
 ```mermaid
 graph TD
-    Goal((Goal)) --> Planner(Planner Agent)
-    Planner --> DAG{Task DAG}
-    DAG --> Scheduler[Scheduler]
-    
-    subgraph "Execution Loop (L0 Orchestration)"
-        Scheduler --> Orchestrator{Left/Right Orchestrator}
-        Orchestrator --> Developer[Developer Agent]
-        Developer --> Reviewer[Reviewer Agent]
-        Reviewer --> DevExp[DevExperiencer]
-        DevExp --> GitOps[Git-Ops]
-        GitOps --> Update[update-task Done]
+    User([Goal]) --> Main[Main Orchestrator]
+
+    subgraph "Cruiser Control"
+        Main <--> |Switch Batch / Context Switch| LR{Left / Right Sub-Agents}
+    end
+
+    subgraph "Context-Safe Operations (Managed by Sub-Agents)"
+        LR --> Planning[Planning Phase: Planner -> Sub-Planner]
+        LR --> Execution[Execution Loop: Dev -> Rev -> Git]
+        LR --> Maintenance[Self-Maintenance: Learning -> Auditor]
     end
     
-    Update --> Triggers{Self-Correction Triggers}
-    Triggers -->|Every 10| Learning[Learning Agent -> FixPlanner]
-    Triggers -->|Every 20| Researcher[Researcher -> Context Compression]
-    Triggers -->|Every 50| Meta[Meta Planner -> DAG Optimization]
-    
-    Learning -.-> DAG
-    Researcher -.-> Memory[(Memory DB)]
-    Meta -.-> DAG
-    
-    Update --> Next[run-next]
-    Next --> Scheduler
+    Planning --> DAG[(Task DAG)]
+    Execution --> DAG
+    Maintenance -.->|Refine| DAG
 ```
 
 ---
@@ -52,17 +43,18 @@ graph TD
 ## Under the Hood: Scalable Autonomy
 
 The system is built to minimize "Main Chat" context overflow. Using a **Dual Sub-Orchestrator system (Left/Right)**, DreamTeam offloads execution to sub-agents, leaving the main chat lean and responsive. This architectural split allows massive task sequences to run even on non-frontier models.
+## AI Sub-Agent Hierarchy
 
-### AI Sub-Agent Hierarchy — Multi-Layered Intelligence
+DreamTeam uses a multi-layered intelligence system to ensure stability over long durations:
 
-DreamTeam uses a structured hierarchy to maintain precision across long-duration projects:
-
-| Layer | Role | Primary Agents |
-|:---:|:---|:---|
-| **L0** | Orchestration | Main Orchestrator, Left/Right |
-| **L1** | Planning & Evolution | Planner, Meta Planner, FixPlanner |
-| **L2** | Core Execution | Developer, Reviewer, Researcher |
-| **L3** | System Ops | Git-Ops, DevExperiencer, Auditor |
+1.  **Level 1: Cruiser Control (Main Orchestrator)**: The entry point. It doesn't perform tasks but manages the switching between "Left" and "Right" sub-orchestrators. This ensures that even for 1000-task journeys, the main chat context remains lean and responsive.
+2.  **Level 2: Mission Dispatch (Sub-Orchestrators)**: Specialized dispatchers that run inside a fresh context. They decide whether to launch the **Planning Phase** or the **Execution Loop** and handle all self-correction triggers.
+3.  **Level 3: Specialized Workers**: 
+    *   **Planner & Sub-Planner**: Decompose high-level goals into a detailed task DAG.
+    *   **Developer**: Implements features and runs tests.
+    *   **Reviewer**: Verifies code quality and architectural compliance.
+    *   **Git-Ops**: Handles commits and repository maintenance.
+    *   **Maintenance Agents**: (Researcher, Learning, Meta-Planner, Auditor) Keep the context compressed and the pipeline optimized.
 
 ---
 
@@ -102,4 +94,4 @@ Launch a minimalistic web dashboard to track your Cruiser's performance:
 PolyForm Noncommercial 1.0.0 — personal, educational, and non-profit use only. See [LICENSE](LICENSE).
 
 ---
-<p align="center">Made with heart from BuLab</p>
+<p align="center">Crafted for Cursor adepts with love from <b>BuLab</b></p>
