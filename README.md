@@ -20,54 +20,59 @@ A long-range **Autonomous Development Cruiser for Cursor** capable of executing 
 The system uses a recursive orchestration loop. The **Main Orchestrator** dispatches specialized sub-orchestrators to handle batches of tasks, keeping the main context clean and stable.
 
 ```mermaid
-graph LR
-    %% Node Styling
-    classDef main fill:#4f46e5,color:#fff,stroke:#3730a3,stroke-width:2px,rx:6
-    classDef sub fill:#f1f5f9,stroke:#64748b,stroke-width:2px,stroke-dasharray: 5,rx:6
-    classDef logic fill:#fff,stroke:#e2e8f0,stroke-width:1px,rx:4
-    classDef maintain fill:#f0fdf4,stroke:#16a34a,color:#166534,rx:4
-    classDef infra fill:#1e293b,color:#fff,stroke:#0f172a,rx:2
-    classDef data fill:#fff,stroke:#475569,stroke-width:2px,shape:cylinder
+graph TD
+    %% Global Nodes
+    classDef clsMain fill:#4f46e5,color:#fff,stroke:#3730a3,stroke-width:2px,rx:10
+    classDef clsOrch fill:#f8fafc,stroke:#94a3b8,stroke-width:2px,stroke-dasharray: 4,rx:10
+    classDef clsWorker fill:#ffffff,stroke:#e2e8f0,stroke-width:1px,rx:4
+    classDef clsMaintain fill:#ecfdf5,stroke:#10b981,color:#064e3b,rx:4
+    classDef clsInfra fill:#0f172a,color:#fff,stroke:#1e293b,rx:2
+    classDef clsDB fill:#fff,stroke:#64748b,stroke-width:2px,shape:cylinder
 
     %% Main Flow
-    Start([Goal]) --> Main[Main Orchestrator]:::main
+    User([User Goal]) --> MO[Main Orchestrator]:::clsMain
 
-    subgraph Strategy ["Strategic Control"]
-        Main <--> Switch{Context Switching}:::sub
-        Switch --- Left[Left Sub-Agent]:::sub
-        Switch --- Right[Right Sub-Agent]:::sub
-    end
-
-    Left & Right --> Ops
-
-    subgraph Ops ["Autonomous Operations"]
+    subgraph Engine ["DreamTeam Cruiser Engine"]
         direction TB
+        MO <--> |"Dispatcher Switch"| LR{Left / Right Sub-Agents}:::clsOrch
         
-        subgraph Planning ["Mission Planning"]
-            P1[Planner]:::logic --> P2[Sub-Planner]:::logic
+        subgraph Context ["Isolated Agent Context"]
+            direction TB
+            LR --> PlanMode[Planning Stage]:::clsWorker
+            LR --> ExecMode[Execution Loop]:::clsWorker
+
+            subgraph PhaseP ["Mission Planning"]
+                PlanMode --> P1[Planner]:::clsWorker --> P2[Sub-Planner]:::clsWorker
+            end
+
+            subgraph PhaseE ["Micro-Task Lifecycle"]
+                ExecMode --> Dev[Developer]:::clsWorker --> Rev[Reviewer]:::clsWorker
+                Rev --> Exp[DevExperience]:::clsWorker --> Git[Git-Ops]:::clsWorker
+                Git --> Upd[update-task Done]:::clsWorker
+                Upd --> |"Loop N < 15"| ExecMode
+            end
+
+            subgraph PhaseM ["Self-Maintenance Chain"]
+                Upd --> |"TRIGGER_*"| Maintenance[Learning / Researcher / Meta]:::clsMaintain
+                Maintenance --> Fix[FixPlanner]:::clsMaintain
+            end
+
+            %% Core Interface
+            PhaseP & PhaseE & PhaseM -.-> Term[[Terminal Subagent]]:::clsInfra
         end
 
-        subgraph Execution ["Execution Loop"]
-            E1[Developer]:::logic --> E2[Reviewer]:::logic
-            E2 --> E3[DevExperience]:::logic
-            E3 --> E4[Git-Ops]:::logic
-            E4 --> E5[update-task]:::logic
-        end
-
-        subgraph Maintenance ["Maintenance & Learning"]
-            M1[Learning Agent]:::maintain --> M2[FixPlanner]:::maintain
-            M3[Researcher]:::maintain
-        end
+        %% Persistence Layer
+        P2 & Fix & Maintenance --- DAG[(Task DAG)]:::clsDB
+        Maintenance --- RAG[(Memory DB / RAG)]:::clsDB
     end
 
-    %% Infrastructure & Data
-    Ops -.- Term{{Terminal Subagent}}:::infra
-    
-    P2 --> DAG[(Task DAG)]:::data
-    E5 -->|Trigger| M1
-    M2 -.->|Re-Plan| DAG
-    M3 -.->|Compress| MEM[(Memory DB)]:::data
-    E5 -.->|Next Task| E1
+    %% Switching Signals
+    Upd -.-> |"1. Batch Limit (15 tasks)\n2. Context Overflow (>80 files)"| MO
+    P2 -.-> |"3. Planning Complete"| MO
+
+    %% Box Styling
+    style Engine fill:#fdfaff,stroke:#c4b5fd,stroke-width:2px
+    style Context fill:#f8fafc,stroke:#e2e8f0,stroke-width:1px
 ```
 
 ---
