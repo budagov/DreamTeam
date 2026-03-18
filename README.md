@@ -15,15 +15,6 @@ A long-range **Autonomous Development Cruiser for Cursor** capable of executing 
 
 ---
 
-## AI Hierarchy: Strategic Isolation
-
-To maintain stability across hundreds of tasks, DreamTeam implements a two-layer hierarchy:
-
-1. **Dispatcher (Strategic Layer):** Lives in the main chat. Its **only** job is to monitor the goal and flip control between Left and Right Orchestrators. It stays lean, never running terminal commands or seeing low-level code.
-2. **Orchestrators (Operative Layer):** Specialized subagents (**orchestrator-left** and **orchestrator-right**) that handle batches of ~15 tasks. They run the full execution loop (Developer → Reviewer → etc.) and manage the database.
-
-This **"Strategic Isolation"** ensures that even if an execution batch becomes context-heavy, the Dispatcher remains a stable, high-level coordinator.
-
 ## Pipeline: High-Performance Autonomy
 
 The system uses a recursive dispatching loop. The **Dispatcher** coordinates specialized orchestrators to handle batches of tasks, keeping the main context clean and stable.
