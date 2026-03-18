@@ -187,17 +187,18 @@ See [LICENSE](LICENSE) for full details.
 
 ### Author’s Engineering Pattern Notice
 
-The dual-orchestrator dispatch model (also referred to as the “ping-pong execution loop” with context resets) is an original engineering approach developed as part of the DreamTeam system.
-Unlike conventional multi-agent orchestration, where coordination occurs within a single persistent context, this pattern is based on externalized dispatching between two alternating orchestrators, each operating within an isolated execution context and explicitly reset after completing a bounded sequence of tasks (N-step execution cycle).
+The dual-orchestrator dispatch model (also referred to as the “ping-pong execution loop” with context resets) is an engineering approach developed as part of the DreamTeam system.
+While multi-agent orchestration is a general concept, the specific implementation, documentation, code structures, and detailed execution methodology described in this project are proprietary and constitute the intellectual property of the authors.
 This approach enables controlled long-running LLM pipelines by:
-- preventing unbounded context accumulation;
-- enforcing deterministic execution segments;
+
+- preventing unbounded context accumulation,
+- enforcing deterministic execution segments, and
 - isolating intermediate state across cycles.
 
-The specific combination of alternating orchestrators, dispatcher-mediated control flow, bounded task cycles, and systematic context resets constitutes a proprietary system design developed by the authors.
-Commercial use, reproduction, or adaptation of this architecture — including functionally equivalent systems that replicate its core execution principles — is prohibited without a separate commercial license.
+The combination of alternating orchestrators, dispatcher-mediated control flow, bounded task cycles, and systematic context resets, as implemented and documented in this project, is protected.
+Commercial use, reproduction, or adaptation of this implementation — including substantially similar systems derived from the project materials — is prohibited without a separate commercial license.
 This restriction does not apply to personal, educational, or non-profit use, which is permitted under the PolyForm Noncommercial 1.0.0 license.
-This notice applies to the dispatching model, execution cycle structure, and context management methodology as embodied in this project and its associated materials.
+This notice applies to the implementation, documentation, and materials associated with this project, not to abstract ideas or concepts of orchestration or task dispatching.
 
 ---
 <p align="center">Crafted for Cursor adepts with love from <b>BuLab</b></p>
