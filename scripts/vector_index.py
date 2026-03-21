@@ -5,13 +5,16 @@ Requires: pip install dreamteam[vector] (sentence-transformers, numpy, qdrant-cl
 import os
 import sys
 import uuid
+import re
 
 import project
 PROJECT_ROOT = project.get_project_root()
 EXCLUDE_DIRS = {"__pycache__", ".git", "node_modules", "venv", ".venv", "db"}
 EXCLUDE_EXT = {".pyc", ".db", ".sqlite", ".png", ".jpg", ".ico"}
-MAX_CHUNK_SIZE = 500
-MIN_CHUNK_SIZE = 50
+TARGET_CHUNK_SIZE = 1000
+MAX_CHUNK_SIZE = 1200
+MIN_CHUNK_SIZE = 80
+OVERLAP_SIZE = 120
 COLLECTION_NAME = "dreamteam_code"
 VECTOR_SIZE = 384  # all-MiniLM-L6-v2
 
@@ -37,28 +40,98 @@ def get_code_files() -> list[tuple[str, str]]:
                     pass
 
 
-def chunk_content(path: str, content: str) -> list[tuple[str, str]]:
-    """Split content into chunks (by function/class or by size)."""
-    chunks = []
-    lines = content.split("\n")
-    current = []
-    current_len = 0
+def _structural_start_regex(path: str) -> re.Pattern[str] | None:
+    """Return regex for structural boundaries by file type."""
+    ext = os.path.splitext(path)[1].lower()
+    if ext == ".py":
+        return re.compile(r"^\s*(class\s+\w+|def\s+\w+)\b")
+    if ext in {".ts", ".tsx", ".js", ".jsx"}:
+        return re.compile(
+            r"^\s*(class\s+\w+|function\s+\w+|(?:const|let|var)\s+\w+\s*=\s*(?:async\s*)?\([^)]*\)\s*=>)\b"
+        )
+    if ext in {".md", ".mdc"}:
+        return re.compile(r"^\s*#{1,3}\s+")
+    return None
 
-    for line in lines:
-        current.append(line)
-        current_len += len(line) + 1
-        if current_len >= MAX_CHUNK_SIZE:
-            text = "\n".join(current)
-            if len(text) >= MIN_CHUNK_SIZE:
-                chunks.append((path, text))
-            current = []
-            current_len = 0
 
-    if current and current_len >= MIN_CHUNK_SIZE:
-        chunks.append((path, "\n".join(current)))
+def _window_chunk_lines(
+    lines: list[str], start_line: int, kind: str
+) -> list[tuple[str, int, int, str]]:
+    """Chunk a list of lines into overlapped windows with line ranges."""
+    out: list[tuple[str, int, int, str]] = []
+    if not lines:
+        return out
 
-    if not chunks and content:
-        chunks.append((path, content[:2000]))
+    i = 0
+    n = len(lines)
+    while i < n:
+        current: list[str] = []
+        cur_len = 0
+        start_idx = i
+        while i < n:
+            ln = lines[i]
+            ln_len = len(ln) + 1
+            if current and cur_len + ln_len > MAX_CHUNK_SIZE:
+                break
+            current.append(ln)
+            cur_len += ln_len
+            i += 1
+            if cur_len >= TARGET_CHUNK_SIZE:
+                break
+
+        text = "\n".join(current).strip()
+        if len(text) >= MIN_CHUNK_SIZE:
+            abs_start = start_line + start_idx
+            abs_end = start_line + i - 1
+            out.append((text, abs_start, abs_end, kind))
+
+        if i >= n:
+            break
+
+        # Move back to create overlap (by characters, approximated via lines).
+        back_chars = 0
+        j = i - 1
+        while j > start_idx and back_chars < OVERLAP_SIZE:
+            back_chars += len(lines[j]) + 1
+            j -= 1
+        i = max(j + 1, start_idx + 1)
+
+    return out
+
+
+def chunk_content(path: str, content: str) -> list[tuple[str, str, int, int, str]]:
+    """Split content into structural chunks, fallback to overlapped windows."""
+    all_lines = content.split("\n")
+    if not all_lines:
+        return []
+
+    boundary_re = _structural_start_regex(path)
+    boundaries: list[int] = []
+    if boundary_re:
+        for idx, line in enumerate(all_lines):
+            if boundary_re.match(line):
+                boundaries.append(idx)
+
+    chunks: list[tuple[str, str, int, int, str]] = []
+
+    if boundaries:
+        boundaries.append(len(all_lines))
+        for b_idx in range(len(boundaries) - 1):
+            start = boundaries[b_idx]
+            end = boundaries[b_idx + 1]
+            block_lines = all_lines[start:end]
+            block_chunks = _window_chunk_lines(block_lines, start + 1, "struct")
+            for text, s_line, e_line, kind in block_chunks:
+                chunks.append((path, text, s_line, e_line, kind))
+    else:
+        block_chunks = _window_chunk_lines(all_lines, 1, "window")
+        for text, s_line, e_line, kind in block_chunks:
+            chunks.append((path, text, s_line, e_line, kind))
+
+    if not chunks and content.strip():
+        snippet = content[:2000]
+        line_count = snippet.count("\n") + 1
+        chunks.append((path, snippet, 1, line_count, "fallback"))
 
     return chunks
 
@@ -106,18 +179,17 @@ def index_codebase() -> None:
     client = _get_qdrant_client()
 
     model = SentenceTransformer("all-MiniLM-L6-v2")
-    chunks: list[tuple[str, str]] = []
+    chunks: list[tuple[str, str, int, int, str]] = []
 
     for path, content in get_code_files():
-        for p, ch in chunk_content(path, content):
-            chunks.append((p, ch))
+        for p, ch, start_line, end_line, kind in chunk_content(path, content):
+            chunks.append((p, ch, start_line, end_line, kind))
 
     if not chunks:
         print("No code files to index.")
         return
 
     texts = [c[1] for c in chunks]
-    paths = [c[0] for c in chunks]
     embeddings = model.encode(texts)
 
     # Delete and recreate for full reindex
@@ -131,9 +203,15 @@ def index_codebase() -> None:
         PointStruct(
             id=str(uuid.uuid4()),
             vector=emb.tolist(),
-            payload={"path": path, "chunk": chunk[:10000]},
+            payload={
+                "path": path,
+                "chunk": chunk[:10000],
+                "start_line": start_line,
+                "end_line": end_line,
+                "kind": kind,
+            },
         )
-        for (path, chunk), emb in zip(zip(paths, texts), embeddings)
+        for (path, chunk, start_line, end_line, kind), emb in zip(chunks, embeddings)
     ]
 
     # Upload in batches (Qdrant recommends ~100-200 per batch)
@@ -142,7 +220,7 @@ def index_codebase() -> None:
         batch = points[i : i + batch_size]
         client.upsert(collection_name=COLLECTION_NAME, points=batch)
 
-    print(f"Indexed {len(chunks)} chunks from {len(set(paths))} files into Qdrant.")
+    print(f"Indexed {len(chunks)} chunks from {len({c[0] for c in chunks})} files into Qdrant.")
 
 
 if __name__ == "__main__":
